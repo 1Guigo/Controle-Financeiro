@@ -11,9 +11,12 @@ function ExpenseFormsPanel({
   onExpenseSubmit,
 }) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-xl shadow-black/20">
-      <h2 className="mb-4 text-lg font-semibold text-slate-100">Lançamentos</h2>
-      <div className="space-y-4">
+    <div
+      id="expense-form-panel"
+      className="app-surface fade-up p-6"
+    >
+      <h2 className="mb-5 text-xl font-semibold tracking-tight text-slate-900">Lançamentos</h2>
+      <div className="space-y-5">
         <IncomeForm
           incomeInput={incomeInput}
           onIncomeInputChange={onIncomeInputChange}

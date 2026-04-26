@@ -1,5 +1,6 @@
 import {
   Cell,
+  Label,
   Legend,
   Pie,
   PieChart,
@@ -26,7 +27,7 @@ function renderTooltip({ active, payload }) {
   const item = payload[0]
 
   return (
-    <div className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 shadow-lg">
+    <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-md">
       <p className="font-medium">{item.name}</p>
       <p>{formatCurrencyBRL(item.value)}</p>
     </div>
@@ -38,7 +39,7 @@ function Chart({ type, data, emptyMessage }) {
 
   if (!data.length || total <= 0) {
     return (
-      <div className="mt-4 flex h-[340px] items-center justify-center rounded-xl border border-dashed border-slate-700 bg-slate-900/40 p-4 text-center text-slate-400">
+      <div className="mt-4 flex h-[340px] items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-center text-slate-500">
         {emptyMessage}
       </div>
     )
@@ -47,7 +48,7 @@ function Chart({ type, data, emptyMessage }) {
   const colors = type === 'usage' ? USAGE_COLORS : CATEGORY_COLORS
 
   return (
-    <div className="mt-4 h-[340px] w-full">
+    <div className="mt-4 h-[360px] w-full fade-up">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
@@ -56,13 +57,18 @@ function Chart({ type, data, emptyMessage }) {
             nameKey="name"
             cx="50%"
             cy="50%"
-            innerRadius={80}
-            outerRadius={130}
-            paddingAngle={4}
+            innerRadius={95}
+            outerRadius={150}
+            paddingAngle={3}
           >
             {data.map((entry, index) => (
               <Cell key={`${entry.name}-${index}`} fill={colors[index % colors.length]} />
             ))}
+            <Label
+              value={formatCurrencyBRL(total)}
+              position="center"
+              className="fill-slate-700 text-sm font-semibold sm:text-base"
+            />
           </Pie>
           <Tooltip content={renderTooltip} />
           <Legend verticalAlign="bottom" height={36} />

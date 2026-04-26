@@ -5,14 +5,14 @@ function ExpenseForm({ categories, formData, onFieldChange, onSubmit }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3 rounded-xl bg-slate-800/50 p-4">
-      <label className="block text-sm text-slate-300">Nova despesa</label>
+    <form onSubmit={handleSubmit} className="space-y-3.5 rounded-2xl bg-slate-50 p-5">
+      <label className="block text-sm font-medium text-slate-700">Nova despesa</label>
       <input
         type="text"
         name="description"
         value={formData.description}
         onChange={(event) => onFieldChange('description', event.target.value)}
-        className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 outline-none ring-indigo-500 transition focus:ring-2"
+        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
         placeholder="Descrição"
         required
       />
@@ -21,7 +21,7 @@ function ExpenseForm({ categories, formData, onFieldChange, onSubmit }) {
           name="category"
           value={formData.category}
           onChange={(event) => onFieldChange('category', event.target.value)}
-          className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 outline-none ring-indigo-500 transition focus:ring-2"
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-900 outline-none transition-all duration-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
         >
           {categories.map((category) => (
             <option key={category} value={category}>
@@ -36,7 +36,7 @@ function ExpenseForm({ categories, formData, onFieldChange, onSubmit }) {
           step="0.01"
           value={formData.amount}
           onChange={(event) => onFieldChange('amount', event.target.value)}
-          className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 outline-none ring-indigo-500 transition focus:ring-2"
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
           placeholder="Valor"
           required
         />
@@ -47,11 +47,11 @@ function ExpenseForm({ categories, formData, onFieldChange, onSubmit }) {
           name="date"
           value={formData.date}
           onChange={(event) => onFieldChange('date', event.target.value)}
-          className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 outline-none ring-indigo-500 transition focus:ring-2"
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-900 outline-none transition-all duration-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
         />
         <button
           type="submit"
-          className="rounded-lg bg-emerald-500 px-4 py-2 font-medium text-white transition hover:bg-emerald-400"
+          className="pressable rounded-xl bg-emerald-500 px-4 py-2.5 font-medium text-white shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-emerald-400"
         >
           Adicionar
         </button>

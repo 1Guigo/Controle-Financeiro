@@ -1,7 +1,11 @@
 import Card from './Card'
 import { formatCurrencyBRL } from '../lib/finance'
 
-function SummaryCards({ income, totalExpenses, balance }) {
+function SummaryCards({ income, incomeDate, totalExpenses, balance }) {
+  const incomeSubtitle = incomeDate
+    ? `Entrada em ${new Date(`${incomeDate}T00:00:00`).toLocaleDateString('pt-BR')}`
+    : 'Valor definido para o mês'
+
   return (
     <section className="grid grid-cols-1 gap-5 md:grid-cols-2">
       <Card
@@ -16,7 +20,7 @@ function SummaryCards({ income, totalExpenses, balance }) {
           title="Receitas"
           value={formatCurrencyBRL(income)}
           tone="income"
-          subtitle="Valor definido para o mês"
+          subtitle={incomeSubtitle}
         />
         <Card
           title="Despesas"

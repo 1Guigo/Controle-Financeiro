@@ -28,16 +28,23 @@ function App() {
         onAddExpenseClick={scrollToExpenseForm}
       />
 
-      <SummaryCards income={data.income} totalExpenses={data.totalExpenses} balance={data.balance} />
+      <SummaryCards
+        income={data.income}
+        incomeDate={data.monthData.incomeDate}
+        totalExpenses={data.totalExpenses}
+        balance={data.balance}
+      />
 
       <ChartsSection categoryData={data.categoryData} usageData={data.usageData} />
 
       <section className="mt-10 grid grid-cols-1 gap-6 2xl:grid-cols-[1fr_1.3fr]">
         <ExpenseFormsPanel
           incomeInput={data.incomeInput}
+          incomeDateInput={data.incomeDateInput}
           expenseForm={data.expenseForm}
           categories={data.categories}
           onIncomeInputChange={data.handleIncomeInputChange}
+          onIncomeDateChange={data.handleIncomeDateChange}
           onIncomeSubmit={data.handleSaveIncome}
           onExpenseFieldChange={data.handleExpenseFieldChange}
           onExpenseSubmit={data.handleAddExpense}

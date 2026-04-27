@@ -4,9 +4,11 @@ import { getCategoryColor } from '../lib/categories'
 
 function ExpenseFormsPanel({
   incomeInput,
+  incomeDateInput,
   expenseForm,
   categories,
   onIncomeInputChange,
+  onIncomeDateChange,
   onIncomeSubmit,
   onExpenseFieldChange,
   onExpenseSubmit,
@@ -20,7 +22,9 @@ function ExpenseFormsPanel({
       <div className="space-y-5">
         <IncomeForm
           incomeInput={incomeInput}
+          incomeDateInput={incomeDateInput}
           onIncomeInputChange={onIncomeInputChange}
+          onIncomeDateChange={onIncomeDateChange}
           onSubmit={onIncomeSubmit}
         />
         <ExpenseForm

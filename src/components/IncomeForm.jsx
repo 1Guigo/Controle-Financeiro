@@ -1,4 +1,10 @@
-function IncomeForm({ incomeInput, onIncomeInputChange, onSubmit }) {
+function IncomeForm({
+  incomeInput,
+  incomeDateInput,
+  onIncomeInputChange,
+  onIncomeDateChange,
+  onSubmit,
+}) {
   function handleSubmit(event) {
     event.preventDefault()
     onSubmit()
@@ -23,6 +29,17 @@ function IncomeForm({ incomeInput, onIncomeInputChange, onSubmit }) {
         >
           Salvar
         </button>
+      </div>
+      <div>
+        <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Data da entrada
+        </label>
+        <input
+          type="date"
+          value={incomeDateInput}
+          onChange={(event) => onIncomeDateChange(event.target.value)}
+          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-900 outline-none transition-all duration-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+        />
       </div>
     </form>
   )

@@ -10,6 +10,7 @@ function ExpenseFormsPanel({
   onIncomeInputChange,
   onIncomeDateChange,
   onIncomeSubmit,
+  onIncomeClear,
   onExpenseFieldChange,
   onExpenseSubmit,
 }) {
@@ -26,6 +27,7 @@ function ExpenseFormsPanel({
           onIncomeInputChange={onIncomeInputChange}
           onIncomeDateChange={onIncomeDateChange}
           onSubmit={onIncomeSubmit}
+          onClearIncome={onIncomeClear}
         />
         <ExpenseForm
           categories={categories}

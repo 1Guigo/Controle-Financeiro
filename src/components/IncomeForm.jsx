@@ -4,10 +4,17 @@ function IncomeForm({
   onIncomeInputChange,
   onIncomeDateChange,
   onSubmit,
+  onClearIncome,
 }) {
   function handleSubmit(event) {
     event.preventDefault()
     onSubmit()
+  }
+
+  function handleClearIncomeClick() {
+    const confirmed = window.confirm('Deseja apagar a receita lançada deste mês?')
+    if (!confirmed) return
+    onClearIncome()
   }
 
   return (
@@ -28,6 +35,13 @@ function IncomeForm({
           className="pressable rounded-xl bg-indigo-500 px-4 py-2.5 font-medium text-white shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-indigo-400"
         >
           Salvar
+        </button>
+        <button
+          type="button"
+          onClick={handleClearIncomeClick}
+          className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 font-medium text-slate-700 transition-all duration-300 hover:bg-slate-100"
+        >
+          Apagar
         </button>
       </div>
       <div>

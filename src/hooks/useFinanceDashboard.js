@@ -154,6 +154,16 @@ export function useFinanceDashboard() {
     setIncomeDateByMonth((prev) => ({ ...prev, [selectedMonth]: value }))
   }
 
+  function handleClearIncome() {
+    updateSelectedMonthData((current) => ({
+      ...current,
+      income: 0,
+      incomeDate: '',
+    }))
+    setIncomeInputByMonth((prev) => ({ ...prev, [selectedMonth]: '' }))
+    setIncomeDateByMonth((prev) => ({ ...prev, [selectedMonth]: '' }))
+  }
+
   function handleExpenseFieldChange(name, value) {
     setExpenseForm((prev) => ({ ...prev, [name]: value }))
   }
@@ -203,6 +213,13 @@ export function useFinanceDashboard() {
     }))
   }
 
+  function handleClearAllExpenses() {
+    updateSelectedMonthData((current) => ({
+      ...current,
+      expenses: [],
+    }))
+  }
+
   function handleSetInstallmentsPaid(id, nextPaid) {
     updateSelectedMonthData((current) => ({
       ...current,
@@ -234,9 +251,11 @@ export function useFinanceDashboard() {
     handleIncomeInputChange,
     handleIncomeDateChange,
     handleSaveIncome,
+    handleClearIncome,
     handleExpenseFieldChange,
     handleAddExpense,
     handleRemoveExpense,
+    handleClearAllExpenses,
     handleSetInstallmentsPaid,
   }
 }

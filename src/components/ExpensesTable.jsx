@@ -1,10 +1,36 @@
 import { formatCurrencyBRL } from '../lib/finance'
 import { getCategoryColor } from '../lib/categories'
 
-function ExpensesTable({ expenses, onRemoveExpense, onSetInstallmentsPaid }) {
+function ExpensesTable({
+  expenses,
+  onRemoveExpense,
+  onSetInstallmentsPaid,
+  onClearAllExpenses,
+}) {
+  function handleClearAllClick() {
+    const confirmed = window.confirm('Deseja apagar todas as despesas deste mês?')
+    if (!confirmed) return
+    onClearAllExpenses()
+  }
+
+  function handleRemoveExpenseClick(id) {
+    const confirmed = window.confirm('Deseja remover esta despesa?')
+    if (!confirmed) return
+    onRemoveExpense(id)
+  }
+
   return (
     <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-xl shadow-black/20">
-      <h2 className="mb-4 text-lg font-semibold text-slate-100">Tabela de despesas</h2>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="text-lg font-semibold text-slate-100">Tabela de despesas</h2>
+        <button
+          type="button"
+          onClick={handleClearAllClick}
+          className="rounded-md border border-rose-500/40 bg-rose-500/10 px-3 py-1.5 text-xs font-medium text-rose-200 transition hover:bg-rose-500/20"
+        >
+          Apagar todas
+        </button>
+      </div>
       <div className="overflow-x-auto">
         <table className="min-w-full text-left text-sm">
           <thead>
@@ -79,7 +105,7 @@ function ExpensesTable({ expenses, onRemoveExpense, onSetInstallmentsPaid }) {
                     <td className="px-3 py-3">
                       <button
                         type="button"
-                        onClick={() => onRemoveExpense(expense.id)}
+                        onClick={() => handleRemoveExpenseClick(expense.id)}
                         className="rounded-md bg-rose-500/20 px-3 py-1.5 text-rose-200 transition hover:bg-rose-500/30"
                       >
                         Remover

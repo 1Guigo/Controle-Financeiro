@@ -46,6 +46,7 @@ function App() {
           onIncomeInputChange={data.handleIncomeInputChange}
           onIncomeDateChange={data.handleIncomeDateChange}
           onIncomeSubmit={data.handleSaveIncome}
+          onIncomeClear={data.handleClearIncome}
           onExpenseFieldChange={data.handleExpenseFieldChange}
           onExpenseSubmit={data.handleAddExpense}
         />
@@ -54,6 +55,7 @@ function App() {
           expenses={data.monthData.expenses}
           onRemoveExpense={data.handleRemoveExpense}
           onSetInstallmentsPaid={data.handleSetInstallmentsPaid}
+          onClearAllExpenses={data.handleClearAllExpenses}
         />
       </section>
     </Layout>

@@ -1,5 +1,6 @@
 import ExpenseForm from './ExpenseForm'
 import IncomeForm from './IncomeForm'
+import { getCategoryColor } from '../lib/categories'
 
 function ExpenseFormsPanel({
   incomeInput,
@@ -25,6 +26,7 @@ function ExpenseFormsPanel({
         <ExpenseForm
           categories={categories}
           formData={expenseForm}
+          getCategoryColor={getCategoryColor}
           onFieldChange={onExpenseFieldChange}
           onSubmit={onExpenseSubmit}
         />

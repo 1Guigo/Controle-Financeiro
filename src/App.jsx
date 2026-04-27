@@ -43,7 +43,11 @@ function App() {
           onExpenseSubmit={data.handleAddExpense}
         />
 
-        <ExpensesTable expenses={data.monthData.expenses} onRemoveExpense={data.handleRemoveExpense} />
+        <ExpensesTable
+          expenses={data.monthData.expenses}
+          onRemoveExpense={data.handleRemoveExpense}
+          onSetInstallmentsPaid={data.handleSetInstallmentsPaid}
+        />
       </section>
     </Layout>
   )

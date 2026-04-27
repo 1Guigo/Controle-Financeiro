@@ -22,7 +22,7 @@ export function calculateTotals(monthData) {
   return { income, totalExpenses, balance }
 }
 
-export function groupExpensesByCategory(expenses) {
+export function groupExpensesByCategory(expenses, getColor) {
   const list = Array.isArray(expenses) ? expenses : []
   const map = new Map()
 
@@ -33,7 +33,11 @@ export function groupExpensesByCategory(expenses) {
   }
 
   return Array.from(map.entries())
-    .map(([name, value]) => ({ name, value: clampToMoney(value) }))
+    .map(([name, value]) => ({
+      name,
+      value: clampToMoney(value),
+      color: typeof getColor === 'function' ? getColor(name) : undefined,
+    }))
     .sort((a, b) => b.value - a.value)
 }
 

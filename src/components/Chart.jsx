@@ -62,7 +62,10 @@ function Chart({ type, data, emptyMessage }) {
             paddingAngle={3}
           >
             {data.map((entry, index) => (
-              <Cell key={`${entry.name}-${index}`} fill={colors[index % colors.length]} />
+              <Cell
+                key={`${entry.name}-${index}`}
+                fill={entry.color || colors[index % colors.length]}
+              />
             ))}
             <Label
               value={formatCurrencyBRL(total)}

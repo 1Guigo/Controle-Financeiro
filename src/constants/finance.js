@@ -14,7 +14,8 @@ export const DEFAULT_MONTH_DATA = {
   incomeMidMonthDate: '',
   incomeEndMonth: 0,
   incomeEndMonthDate: '',
-  investments: 0,
+  investments: [],
+  cashbox: 0,
   expenses: [],
 }
 

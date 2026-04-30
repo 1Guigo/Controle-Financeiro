@@ -7,15 +7,20 @@ function ExpenseFormsPanel({
   incomeInputEnd,
   incomeDateInputMid,
   incomeDateInputEnd,
-  investmentsInput,
+  investmentForm,
+  investmentsList,
+  cashboxInput,
   expenseForm,
   categories,
   onIncomeInputChange,
   onIncomeDateChange,
-  onInvestmentsInputChange,
+  onInvestmentFormChange,
+  onAddInvestment,
+  onRemoveInvestment,
+  onCashboxInputChange,
+  onSaveCashbox,
   onIncomeSubmit,
   onIncomeClear,
-  onInvestmentsSubmit,
   onExpenseFieldChange,
   onExpenseSubmit,
 }) {
@@ -31,13 +36,18 @@ function ExpenseFormsPanel({
           incomeInputEnd={incomeInputEnd}
           incomeDateInputMid={incomeDateInputMid}
           incomeDateInputEnd={incomeDateInputEnd}
-          investmentsInput={investmentsInput}
+          investmentForm={investmentForm}
+          investmentsList={investmentsList}
+          cashboxInput={cashboxInput}
           onIncomeInputChange={onIncomeInputChange}
           onIncomeDateChange={onIncomeDateChange}
-          onInvestmentsInputChange={onInvestmentsInputChange}
+          onInvestmentFormChange={onInvestmentFormChange}
+          onAddInvestment={onAddInvestment}
+          onRemoveInvestment={onRemoveInvestment}
+          onCashboxInputChange={onCashboxInputChange}
+          onSaveCashbox={onSaveCashbox}
           onSubmit={onIncomeSubmit}
           onClearIncome={onIncomeClear}
-          onSubmitInvestments={onInvestmentsSubmit}
         />
         <ExpenseForm
           categories={categories}

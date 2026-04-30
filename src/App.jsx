@@ -30,7 +30,8 @@ function App() {
 
       <SummaryCards
         income={data.income}
-        investments={data.monthData.investments}
+        investments={data.totalInvestments}
+        cashbox={data.cashbox}
         totalExpenses={data.totalExpenses}
         balance={data.balance}
       />
@@ -43,15 +44,20 @@ function App() {
           incomeInputEnd={data.incomeInputEnd}
           incomeDateInputMid={data.incomeDateInputMid}
           incomeDateInputEnd={data.incomeDateInputEnd}
-          investmentsInput={data.investmentsInput}
+          investmentForm={data.investmentForm}
+          investmentsList={data.monthData.investments}
+          cashboxInput={data.cashboxInput}
           expenseForm={data.expenseForm}
           categories={data.categories}
           onIncomeInputChange={data.handleIncomeInputChange}
           onIncomeDateChange={data.handleIncomeDateChange}
-          onInvestmentsInputChange={data.handleInvestmentsInputChange}
+          onInvestmentFormChange={data.handleInvestmentFormChange}
+          onAddInvestment={data.handleAddInvestment}
+          onRemoveInvestment={data.handleRemoveInvestment}
+          onCashboxInputChange={data.handleCashboxInputChange}
+          onSaveCashbox={data.handleSaveCashbox}
           onIncomeSubmit={data.handleSaveIncome}
           onIncomeClear={data.handleClearIncome}
-          onInvestmentsSubmit={data.handleSaveInvestments}
           onExpenseFieldChange={data.handleExpenseFieldChange}
           onExpenseSubmit={data.handleAddExpense}
         />

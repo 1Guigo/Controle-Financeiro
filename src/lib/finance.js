@@ -16,13 +16,21 @@ export function calculateTotals(monthData) {
   const incomeMidMonth = clampToMoney(monthData?.incomeMidMonth ?? 0)
   const incomeEndMonth = clampToMoney(monthData?.incomeEndMonth ?? 0)
   const income = clampToMoney(incomeMidMonth + incomeEndMonth)
-  const investments = clampToMoney(monthData?.investments ?? 0)
+  
+  const investmentsList = Array.isArray(monthData?.investments) ? monthData.investments : []
+  const totalInvestments = clampToMoney(
+    investmentsList.reduce((acc, inv) => acc + clampToMoney(inv.valor ?? inv.amount ?? 0), 0),
+  )
+  
+  const cashbox = clampToMoney(monthData?.cashbox ?? 0)
+  
   const expenses = Array.isArray(monthData?.expenses) ? monthData.expenses : []
   const totalExpenses = clampToMoney(
     expenses.reduce((acc, e) => acc + clampToMoney(e.amount), 0),
   )
-  const balance = clampToMoney(income - totalExpenses - investments)
-  return { income, investments, totalExpenses, balance }
+  
+  const balance = clampToMoney(income - totalExpenses - totalInvestments - cashbox)
+  return { income, investments: totalInvestments, cashbox, totalExpenses, balance }
 }
 
 export function groupExpensesByCategory(expenses, getColor) {

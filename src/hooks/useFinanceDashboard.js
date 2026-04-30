@@ -23,12 +23,26 @@ function mergeSavedState(savedState) {
   for (const month of MONTHS) {
     const data = savedState[month.key]
     if (!data || typeof data !== 'object') continue
+    
+    // Migração de investimentos antigos (número para array)
+    let investments = []
+    if (Array.isArray(data.investments)) {
+      investments = data.investments.map((inv) => ({
+        id: String(inv.id || crypto.randomUUID()),
+        nome: String(inv.nome || inv.name || ''),
+        valor: clampToMoney(inv.valor || inv.amount || 0),
+      }))
+    } else if (typeof data.investments === 'number' && data.investments > 0) {
+      investments = [{ id: crypto.randomUUID(), nome: 'Investimento', valor: clampToMoney(data.investments) }]
+    }
+    
     base[month.key] = {
       incomeMidMonth: clampToMoney(data.incomeMidMonth ?? data.income ?? 0),
       incomeMidMonthDate: String(data.incomeMidMonthDate || data.incomeDate || ''),
       incomeEndMonth: clampToMoney(data.incomeEndMonth ?? 0),
       incomeEndMonthDate: String(data.incomeEndMonthDate || ''),
-      investments: clampToMoney(data.investments ?? 0),
+      investments,
+      cashbox: clampToMoney(data.cashbox ?? 0),
       expenses: Array.isArray(data.expenses)
         ? data.expenses
             .filter((expense) => expense && typeof expense === 'object')
@@ -76,8 +90,18 @@ function getIncomeDateDrafts(financeByMonth) {
 
 function getInvestmentsDrafts(financeByMonth) {
   return MONTHS.reduce((acc, month) => {
-    const investments = financeByMonth[month.key]?.investments ?? 0
-    acc[month.key] = investments ? String(investments) : ''
+    acc[month.key] = {
+      name: '',
+      valor: '',
+    }
+    return acc
+  }, {})
+}
+
+function getCashboxDrafts(financeByMonth) {
+  return MONTHS.reduce((acc, month) => {
+    const cashbox = financeByMonth[month.key]?.cashbox ?? 0
+    acc[month.key] = cashbox ? String(cashbox) : ''
     return acc
   }, {})
 }
@@ -94,8 +118,11 @@ export function useFinanceDashboard() {
   const [incomeDateByMonth, setIncomeDateByMonth] = useState(() =>
     getIncomeDateDrafts(initialFinance),
   )
-  const [investmentsInputByMonth, setInvestmentsInputByMonth] = useState(() =>
+  const [investmentFormByMonth, setInvestmentFormByMonth] = useState(() =>
     getInvestmentsDrafts(initialFinance),
+  )
+  const [cashboxInputByMonth, setCashboxInputByMonth] = useState(() =>
+    getCashboxDrafts(initialFinance),
   )
   const [expenseForm, setExpenseForm] = useState({
     description: '',
@@ -118,8 +145,9 @@ export function useFinanceDashboard() {
   const incomeInputEnd = incomeInputByMonth[`${selectedMonth}_end`] ?? ''
   const incomeDateInputMid = incomeDateByMonth[`${selectedMonth}_mid`] ?? ''
   const incomeDateInputEnd = incomeDateByMonth[`${selectedMonth}_end`] ?? ''
-  const investmentsInput = investmentsInputByMonth[selectedMonth] ?? ''
-  const { income, totalExpenses, balance } = useMemo(
+  const investmentForm = investmentFormByMonth[selectedMonth] ?? { name: '', valor: '' }
+  const cashboxInput = cashboxInputByMonth[selectedMonth] ?? ''
+  const { income, investments: totalInvestments, cashbox, totalExpenses, balance } = useMemo(
     () => calculateTotals(monthData),
     [monthData],
   )
@@ -200,19 +228,55 @@ export function useFinanceDashboard() {
     }))
   }
 
-  function handleInvestmentsInputChange(value) {
-    setInvestmentsInputByMonth((prev) => ({ ...prev, [selectedMonth]: value }))
+  function handleInvestmentFormChange(field, value) {
+    setInvestmentFormByMonth((prev) => ({
+      ...prev,
+      [selectedMonth]: { ...prev[selectedMonth], [field]: value },
+    }))
   }
 
-  function handleSaveInvestments() {
-    const investments = clampToMoney(investmentsInput)
+  function handleAddInvestment() {
+    const nome = investmentForm.name?.trim()
+    const valor = clampToMoney(investmentForm.valor)
+    if (!nome || valor <= 0) return
+
+    const newInvestment = {
+      id: crypto.randomUUID(),
+      nome,
+      valor,
+    }
+
     updateSelectedMonthData((current) => ({
       ...current,
-      investments,
+      investments: [...(current.investments || []), newInvestment],
     }))
-    setInvestmentsInputByMonth((prev) => ({
+
+    setInvestmentFormByMonth((prev) => ({
       ...prev,
-      [selectedMonth]: investments ? String(investments) : '',
+      [selectedMonth]: { name: '', valor: '' },
+    }))
+  }
+
+  function handleRemoveInvestment(id) {
+    updateSelectedMonthData((current) => ({
+      ...current,
+      investments: (current.investments || []).filter((inv) => inv.id !== id),
+    }))
+  }
+
+  function handleCashboxInputChange(value) {
+    setCashboxInputByMonth((prev) => ({ ...prev, [selectedMonth]: value }))
+  }
+
+  function handleSaveCashbox() {
+    const cashbox = clampToMoney(cashboxInput)
+    updateSelectedMonthData((current) => ({
+      ...current,
+      cashbox,
+    }))
+    setCashboxInputByMonth((prev) => ({
+      ...prev,
+      [selectedMonth]: cashbox ? String(cashbox) : '',
     }))
   }
 
@@ -299,8 +363,11 @@ export function useFinanceDashboard() {
     expenseForm,
     incomeDateInputMid,
     incomeDateInputEnd,
-    investmentsInput,
+    investmentForm,
+    cashboxInput,
     income,
+    totalInvestments,
+    cashbox,
     totalExpenses,
     balance,
     categoryData,
@@ -309,8 +376,11 @@ export function useFinanceDashboard() {
     handleIncomeDateChange,
     handleSaveIncome,
     handleClearIncome,
-    handleInvestmentsInputChange,
-    handleSaveInvestments,
+    handleInvestmentFormChange,
+    handleAddInvestment,
+    handleRemoveInvestment,
+    handleCashboxInputChange,
+    handleSaveCashbox,
     handleExpenseFieldChange,
     handleAddExpense,
     handleRemoveExpense,

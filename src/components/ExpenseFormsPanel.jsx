@@ -3,14 +3,19 @@ import IncomeForm from './IncomeForm'
 import { getCategoryColor } from '../lib/categories'
 
 function ExpenseFormsPanel({
-  incomeInput,
-  incomeDateInput,
+  incomeInputMid,
+  incomeInputEnd,
+  incomeDateInputMid,
+  incomeDateInputEnd,
+  investmentsInput,
   expenseForm,
   categories,
   onIncomeInputChange,
   onIncomeDateChange,
+  onInvestmentsInputChange,
   onIncomeSubmit,
   onIncomeClear,
+  onInvestmentsSubmit,
   onExpenseFieldChange,
   onExpenseSubmit,
 }) {
@@ -22,12 +27,17 @@ function ExpenseFormsPanel({
       <h2 className="mb-5 text-xl font-semibold tracking-tight text-slate-900">Lançamentos</h2>
       <div className="space-y-5">
         <IncomeForm
-          incomeInput={incomeInput}
-          incomeDateInput={incomeDateInput}
+          incomeInputMid={incomeInputMid}
+          incomeInputEnd={incomeInputEnd}
+          incomeDateInputMid={incomeDateInputMid}
+          incomeDateInputEnd={incomeDateInputEnd}
+          investmentsInput={investmentsInput}
           onIncomeInputChange={onIncomeInputChange}
           onIncomeDateChange={onIncomeDateChange}
+          onInvestmentsInputChange={onInvestmentsInputChange}
           onSubmit={onIncomeSubmit}
           onClearIncome={onIncomeClear}
+          onSubmitInvestments={onInvestmentsSubmit}
         />
         <ExpenseForm
           categories={categories}

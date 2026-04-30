@@ -9,5 +9,12 @@ export const CATEGORIES = [
   { name: 'Outros', color: '#94a3b8' }, // slate
 ]
 
-export const DEFAULT_MONTH_DATA = { income: 0, incomeDate: '', expenses: [] }
+export const DEFAULT_MONTH_DATA = {
+  incomeMidMonth: 0,
+  incomeMidMonthDate: '',
+  incomeEndMonth: 0,
+  incomeEndMonthDate: '',
+  investments: 0,
+  expenses: [],
+}
 

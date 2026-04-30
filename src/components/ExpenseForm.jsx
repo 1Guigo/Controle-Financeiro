@@ -94,6 +94,17 @@ function ExpenseForm({ categories, getCategoryColor, formData, onFieldChange, on
           </div>
         ) : null}
       </div>
+      <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+        <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+          <input
+            type="checkbox"
+            checked={Boolean(formData.isFixed)}
+            onChange={(event) => onFieldChange('isFixed', event.target.checked)}
+            className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+          />
+          Despesa fixa
+        </label>
+      </div>
       <div className="flex items-center justify-between gap-3">
         <input
           type="date"

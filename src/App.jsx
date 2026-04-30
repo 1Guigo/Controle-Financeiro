@@ -30,7 +30,7 @@ function App() {
 
       <SummaryCards
         income={data.income}
-        incomeDate={data.monthData.incomeDate}
+        investments={data.monthData.investments}
         totalExpenses={data.totalExpenses}
         balance={data.balance}
       />
@@ -39,14 +39,19 @@ function App() {
 
       <section className="mt-10 grid grid-cols-1 gap-6 2xl:grid-cols-[1fr_1.3fr]">
         <ExpenseFormsPanel
-          incomeInput={data.incomeInput}
-          incomeDateInput={data.incomeDateInput}
+          incomeInputMid={data.incomeInputMid}
+          incomeInputEnd={data.incomeInputEnd}
+          incomeDateInputMid={data.incomeDateInputMid}
+          incomeDateInputEnd={data.incomeDateInputEnd}
+          investmentsInput={data.investmentsInput}
           expenseForm={data.expenseForm}
           categories={data.categories}
           onIncomeInputChange={data.handleIncomeInputChange}
           onIncomeDateChange={data.handleIncomeDateChange}
+          onInvestmentsInputChange={data.handleInvestmentsInputChange}
           onIncomeSubmit={data.handleSaveIncome}
           onIncomeClear={data.handleClearIncome}
+          onInvestmentsSubmit={data.handleSaveInvestments}
           onExpenseFieldChange={data.handleExpenseFieldChange}
           onExpenseSubmit={data.handleAddExpense}
         />

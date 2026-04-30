@@ -24,8 +24,11 @@ function mergeSavedState(savedState) {
     const data = savedState[month.key]
     if (!data || typeof data !== 'object') continue
     base[month.key] = {
-      income: clampToMoney(data.income ?? 0),
-      incomeDate: String(data.incomeDate || ''),
+      incomeMidMonth: clampToMoney(data.incomeMidMonth ?? data.income ?? 0),
+      incomeMidMonthDate: String(data.incomeMidMonthDate || data.incomeDate || ''),
+      incomeEndMonth: clampToMoney(data.incomeEndMonth ?? 0),
+      incomeEndMonthDate: String(data.incomeEndMonthDate || ''),
+      investments: clampToMoney(data.investments ?? 0),
       expenses: Array.isArray(data.expenses)
         ? data.expenses
             .filter((expense) => expense && typeof expense === 'object')
@@ -43,6 +46,7 @@ function mergeSavedState(savedState) {
                 date: String(expense.date || ''),
                 installmentsTotal,
                 installmentsPaid,
+                isFixed: Boolean(expense.isFixed || false),
               }
             })
         : [],
@@ -54,15 +58,26 @@ function mergeSavedState(savedState) {
 
 function getIncomeDrafts(financeByMonth) {
   return MONTHS.reduce((acc, month) => {
-    const value = financeByMonth[month.key]?.income ?? 0
-    acc[month.key] = value ? String(value) : ''
+    const midMonth = financeByMonth[month.key]?.incomeMidMonth ?? 0
+    const endMonth = financeByMonth[month.key]?.incomeEndMonth ?? 0
+    acc[`${month.key}_mid`] = midMonth ? String(midMonth) : ''
+    acc[`${month.key}_end`] = endMonth ? String(endMonth) : ''
     return acc
   }, {})
 }
 
 function getIncomeDateDrafts(financeByMonth) {
   return MONTHS.reduce((acc, month) => {
-    acc[month.key] = String(financeByMonth[month.key]?.incomeDate || '')
+    acc[`${month.key}_mid`] = String(financeByMonth[month.key]?.incomeMidMonthDate || '')
+    acc[`${month.key}_end`] = String(financeByMonth[month.key]?.incomeEndMonthDate || '')
+    return acc
+  }, {})
+}
+
+function getInvestmentsDrafts(financeByMonth) {
+  return MONTHS.reduce((acc, month) => {
+    const investments = financeByMonth[month.key]?.investments ?? 0
+    acc[month.key] = investments ? String(investments) : ''
     return acc
   }, {})
 }
@@ -79,6 +94,9 @@ export function useFinanceDashboard() {
   const [incomeDateByMonth, setIncomeDateByMonth] = useState(() =>
     getIncomeDateDrafts(initialFinance),
   )
+  const [investmentsInputByMonth, setInvestmentsInputByMonth] = useState(() =>
+    getInvestmentsDrafts(initialFinance),
+  )
   const [expenseForm, setExpenseForm] = useState({
     description: '',
     category: getCategoryNames()[0],
@@ -87,6 +105,7 @@ export function useFinanceDashboard() {
     isInstallment: false,
     installmentsTotal: 2,
     installmentsPaid: 0,
+    isFixed: false,
   })
 
   const monthLabel = useMemo(
@@ -95,8 +114,11 @@ export function useFinanceDashboard() {
   )
 
   const monthData = financeByMonth[selectedMonth] || DEFAULT_MONTH_DATA
-  const incomeInput = incomeInputByMonth[selectedMonth] ?? ''
-  const incomeDateInput = incomeDateByMonth[selectedMonth] ?? ''
+  const incomeInputMid = incomeInputByMonth[`${selectedMonth}_mid`] ?? ''
+  const incomeInputEnd = incomeInputByMonth[`${selectedMonth}_end`] ?? ''
+  const incomeDateInputMid = incomeDateByMonth[`${selectedMonth}_mid`] ?? ''
+  const incomeDateInputEnd = incomeDateByMonth[`${selectedMonth}_end`] ?? ''
+  const investmentsInput = investmentsInputByMonth[selectedMonth] ?? ''
   const { income, totalExpenses, balance } = useMemo(
     () => calculateTotals(monthData),
     [monthData],
@@ -133,35 +155,65 @@ export function useFinanceDashboard() {
     }))
   }
 
-  function handleIncomeInputChange(value) {
-    setIncomeInputByMonth((prev) => ({ ...prev, [selectedMonth]: value }))
+  function handleIncomeInputChange(type, value) {
+    setIncomeInputByMonth((prev) => ({ ...prev, [`${selectedMonth}_${type}`]: value }))
   }
 
   function handleSaveIncome() {
-    const value = clampToMoney(incomeInput)
+    const midMonth = clampToMoney(incomeInputMid)
+    const endMonth = clampToMoney(incomeInputEnd)
     updateSelectedMonthData((current) => ({
       ...current,
-      income: value,
-      incomeDate: incomeDateInput,
+      incomeMidMonth: midMonth,
+      incomeMidMonthDate: incomeDateInputMid,
+      incomeEndMonth: endMonth,
+      incomeEndMonthDate: incomeDateInputEnd,
     }))
     setIncomeInputByMonth((prev) => ({
       ...prev,
-      [selectedMonth]: value ? String(value) : '',
+      [`${selectedMonth}_mid`]: midMonth ? String(midMonth) : '',
+      [`${selectedMonth}_end`]: endMonth ? String(endMonth) : '',
     }))
   }
 
-  function handleIncomeDateChange(value) {
-    setIncomeDateByMonth((prev) => ({ ...prev, [selectedMonth]: value }))
+  function handleIncomeDateChange(type, value) {
+    setIncomeDateByMonth((prev) => ({ ...prev, [`${selectedMonth}_${type}`]: value }))
   }
 
   function handleClearIncome() {
     updateSelectedMonthData((current) => ({
       ...current,
-      income: 0,
-      incomeDate: '',
+      incomeMidMonth: 0,
+      incomeMidMonthDate: '',
+      incomeEndMonth: 0,
+      incomeEndMonthDate: '',
     }))
-    setIncomeInputByMonth((prev) => ({ ...prev, [selectedMonth]: '' }))
-    setIncomeDateByMonth((prev) => ({ ...prev, [selectedMonth]: '' }))
+    setIncomeInputByMonth((prev) => ({
+      ...prev,
+      [`${selectedMonth}_mid`]: '',
+      [`${selectedMonth}_end`]: '',
+    }))
+    setIncomeDateByMonth((prev) => ({
+      ...prev,
+      [`${selectedMonth}_mid`]: '',
+      [`${selectedMonth}_end`]: '',
+    }))
+  }
+
+  function handleInvestmentsInputChange(value) {
+    setInvestmentsInputByMonth((prev) => ({ ...prev, [selectedMonth]: value }))
+  }
+
+  function handleSaveInvestments() {
+    const investments = clampToMoney(investmentsInput)
+    updateSelectedMonthData((current) => ({
+      ...current,
+      investments,
+    }))
+    setInvestmentsInputByMonth((prev) => ({
+      ...prev,
+      [selectedMonth]: investments ? String(investments) : '',
+    }))
   }
 
   function handleExpenseFieldChange(name, value) {
@@ -188,6 +240,7 @@ export function useFinanceDashboard() {
       date: expenseForm.date,
       installmentsTotal,
       installmentsPaid,
+      isFixed: Boolean(expenseForm.isFixed),
     }
 
     updateSelectedMonthData((current) => ({
@@ -203,6 +256,7 @@ export function useFinanceDashboard() {
       isInstallment: false,
       installmentsTotal: 2,
       installmentsPaid: 0,
+      isFixed: false,
     })
   }
 
@@ -240,9 +294,12 @@ export function useFinanceDashboard() {
     setSelectedMonth,
     monthLabel,
     monthData,
-    incomeInput,
+    incomeInputMid,
+    incomeInputEnd,
     expenseForm,
-    incomeDateInput,
+    incomeDateInputMid,
+    incomeDateInputEnd,
+    investmentsInput,
     income,
     totalExpenses,
     balance,
@@ -252,6 +309,8 @@ export function useFinanceDashboard() {
     handleIncomeDateChange,
     handleSaveIncome,
     handleClearIncome,
+    handleInvestmentsInputChange,
+    handleSaveInvestments,
     handleExpenseFieldChange,
     handleAddExpense,
     handleRemoveExpense,

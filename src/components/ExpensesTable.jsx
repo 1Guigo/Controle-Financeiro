@@ -38,6 +38,7 @@ function ExpensesTable({
               <th className="px-3 py-2 font-medium">Descrição</th>
               <th className="px-3 py-2 font-medium">Categoria</th>
               <th className="px-3 py-2 font-medium">Parcelas</th>
+              <th className="px-3 py-2 font-medium">Tipo</th>
               <th className="px-3 py-2 font-medium">Data</th>
               <th className="px-3 py-2 font-medium">Valor</th>
               <th className="px-3 py-2 font-medium">Ações</th>
@@ -95,6 +96,15 @@ function ExpensesTable({
                       )}
                     </td>
                     <td className="px-3 py-3">
+                      {expense.isFixed ? (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-200">
+                          Fixa
+                        </span>
+                      ) : (
+                        <span className="text-xs text-slate-500">—</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-3">
                       {expense.date
                         ? new Date(`${expense.date}T00:00:00`).toLocaleDateString('pt-BR')
                         : '-'}
@@ -116,7 +126,7 @@ function ExpensesTable({
               })
             ) : (
               <tr>
-                <td colSpan={6} className="px-3 py-6 text-center text-slate-500">
+                <td colSpan={7} className="px-3 py-6 text-center text-slate-500">
                   Nenhuma despesa cadastrada neste mês.
                 </td>
               </tr>

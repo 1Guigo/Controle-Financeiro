@@ -25,6 +25,11 @@ function App() {
       <Header
         monthLabel={data.monthLabel}
         balance={data.balance}
+        calculatedBalance={data.calculatedBalance}
+        manualBalanceInput={data.manualBalanceInput}
+        onManualBalanceInputChange={data.handleManualBalanceInputChange}
+        onSaveManualBalance={data.handleSaveManualBalance}
+        onClearManualBalance={data.handleClearManualBalance}
         onAddExpenseClick={scrollToExpenseForm}
       />
 
@@ -34,6 +39,8 @@ function App() {
         cashbox={data.cashbox}
         totalExpenses={data.totalExpenses}
         balance={data.balance}
+        calculatedBalance={data.calculatedBalance}
+        carryOver={data.carryOver}
       />
 
       <ChartsSection categoryData={data.categoryData} usageData={data.usageData} />

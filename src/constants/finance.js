@@ -17,5 +17,7 @@ export const DEFAULT_MONTH_DATA = {
   investments: [],
   cashbox: 0,
   expenses: [],
+  manualBalance: null, // null means use calculated balance
+  carryOver: 0, // saldo transferido do mês anterior
 }
 

@@ -29,8 +29,12 @@ export function calculateTotals(monthData) {
     expenses.reduce((acc, e) => acc + clampToMoney(e.amount), 0),
   )
   
-  const balance = clampToMoney(income - totalExpenses - totalInvestments - cashbox)
-  return { income, investments: totalInvestments, cashbox, totalExpenses, balance }
+  const carryOver = clampToMoney(monthData?.carryOver ?? 0)
+  const calculatedBalance = clampToMoney(carryOver + income - totalExpenses - totalInvestments - cashbox)
+  const balance = monthData?.manualBalance !== null && monthData?.manualBalance !== undefined
+    ? clampToMoney(monthData.manualBalance)
+    : calculatedBalance
+  return { income, investments: totalInvestments, cashbox, totalExpenses, balance, calculatedBalance, carryOver }
 }
 
 export function groupExpensesByCategory(expenses, getColor) {

@@ -43,6 +43,8 @@ function mergeSavedState(savedState) {
       incomeEndMonthDate: String(data.incomeEndMonthDate || ''),
       investments,
       cashbox: clampToMoney(data.cashbox ?? 0),
+      manualBalance: data.manualBalance !== undefined ? clampToMoney(data.manualBalance) : null,
+      carryOver: clampToMoney(data.carryOver ?? 0),
       expenses: Array.isArray(data.expenses)
         ? data.expenses
             .filter((expense) => expense && typeof expense === 'object')
@@ -88,7 +90,7 @@ function getIncomeDateDrafts(financeByMonth) {
   }, {})
 }
 
-function getInvestmentsDrafts(financeByMonth) {
+function getInvestmentsDrafts() {
   return MONTHS.reduce((acc, month) => {
     acc[month.key] = {
       name: '',
@@ -102,6 +104,14 @@ function getCashboxDrafts(financeByMonth) {
   return MONTHS.reduce((acc, month) => {
     const cashbox = financeByMonth[month.key]?.cashbox ?? 0
     acc[month.key] = cashbox ? String(cashbox) : ''
+    return acc
+  }, {})
+}
+
+function getManualBalanceDrafts(financeByMonth) {
+  return MONTHS.reduce((acc, month) => {
+    const manualBalance = financeByMonth[month.key]?.manualBalance
+    acc[month.key] = manualBalance !== null && manualBalance !== undefined ? String(manualBalance) : ''
     return acc
   }, {})
 }
@@ -123,6 +133,9 @@ export function useFinanceDashboard() {
   )
   const [cashboxInputByMonth, setCashboxInputByMonth] = useState(() =>
     getCashboxDrafts(initialFinance),
+  )
+  const [manualBalanceInputByMonth, setManualBalanceInputByMonth] = useState(() =>
+    getManualBalanceDrafts(initialFinance),
   )
   const [expenseForm, setExpenseForm] = useState({
     description: '',
@@ -147,7 +160,8 @@ export function useFinanceDashboard() {
   const incomeDateInputEnd = incomeDateByMonth[`${selectedMonth}_end`] ?? ''
   const investmentForm = investmentFormByMonth[selectedMonth] ?? { name: '', valor: '' }
   const cashboxInput = cashboxInputByMonth[selectedMonth] ?? ''
-  const { income, investments: totalInvestments, cashbox, totalExpenses, balance } = useMemo(
+  const manualBalanceInput = manualBalanceInputByMonth[selectedMonth] ?? ''
+  const { income, investments: totalInvestments, cashbox, totalExpenses, balance, calculatedBalance, carryOver } = useMemo(
     () => calculateTotals(monthData),
     [monthData],
   )
@@ -171,6 +185,26 @@ export function useFinanceDashboard() {
       { name: 'Sobra', value: clampToMoney(remaining) },
     ]
   }, [income, totalExpenses])
+
+  useEffect(() => {
+    // Transferir saldo do mês anterior como carryOver para o mês atual
+    const prevMonthKey = selectedMonth === '01' ? '12' : String(Number(selectedMonth) - 1).padStart(2, '0')
+    const prevMonthData = financeByMonth[prevMonthKey]
+    if (prevMonthData) {
+      const prevTotals = calculateTotals(prevMonthData)
+      const prevBalance = prevTotals.balance
+      // Só transferir se positivo e se o mês atual ainda não tem carryOver definido
+      if (prevBalance > 0 && (!monthData.carryOver || monthData.carryOver === 0)) {
+        setFinanceByMonth((prev) => ({
+          ...prev,
+          [selectedMonth]: {
+            ...prev[selectedMonth],
+            carryOver: prevBalance,
+          },
+        }))
+      }
+    }
+  }, [selectedMonth, financeByMonth, monthData.carryOver])
 
   useEffect(() => {
     saveAppState(financeByMonth)
@@ -280,6 +314,33 @@ export function useFinanceDashboard() {
     }))
   }
 
+  function handleManualBalanceInputChange(value) {
+    setManualBalanceInputByMonth((prev) => ({ ...prev, [selectedMonth]: value }))
+  }
+
+  function handleSaveManualBalance() {
+    const manualBalance = manualBalanceInput ? clampToMoney(manualBalanceInput) : null
+    updateSelectedMonthData((current) => ({
+      ...current,
+      manualBalance,
+    }))
+    setManualBalanceInputByMonth((prev) => ({
+      ...prev,
+      [selectedMonth]: manualBalance !== null ? String(manualBalance) : '',
+    }))
+  }
+
+  function handleClearManualBalance() {
+    updateSelectedMonthData((current) => ({
+      ...current,
+      manualBalance: null,
+    }))
+    setManualBalanceInputByMonth((prev) => ({
+      ...prev,
+      [selectedMonth]: '',
+    }))
+  }
+
   function handleExpenseFieldChange(name, value) {
     setExpenseForm((prev) => ({ ...prev, [name]: value }))
   }
@@ -365,11 +426,14 @@ export function useFinanceDashboard() {
     incomeDateInputEnd,
     investmentForm,
     cashboxInput,
+    manualBalanceInput,
     income,
     totalInvestments,
     cashbox,
     totalExpenses,
     balance,
+    calculatedBalance,
+    carryOver,
     categoryData,
     usageData,
     handleIncomeInputChange,
@@ -381,6 +445,9 @@ export function useFinanceDashboard() {
     handleRemoveInvestment,
     handleCashboxInputChange,
     handleSaveCashbox,
+    handleManualBalanceInputChange,
+    handleSaveManualBalance,
+    handleClearManualBalance,
     handleExpenseFieldChange,
     handleAddExpense,
     handleRemoveExpense,

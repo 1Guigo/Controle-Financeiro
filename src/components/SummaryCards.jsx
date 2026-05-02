@@ -1,14 +1,15 @@
 import Card from './Card'
 import { formatCurrencyBRL } from '../lib/finance'
 
-function SummaryCards({ income, investments, cashbox, totalExpenses, balance }) {
+function SummaryCards({ income, investments, cashbox, totalExpenses, balance, calculatedBalance, carryOver }) {
+  const isManualBalance = balance !== calculatedBalance
   return (
     <section className="grid grid-cols-1 gap-5 md:grid-cols-2">
       <Card
         title="Saldo atual"
         value={formatCurrencyBRL(balance)}
         tone={balance >= 0 ? 'balancePositive' : 'balanceNegative'}
-        subtitle={balance >= 0 ? 'Dentro do planejado' : 'Atenção ao orçamento'}
+        subtitle={isManualBalance ? 'Saldo manual definido' : (balance >= 0 ? 'Dentro do planejado' : 'Atenção ao orçamento')}
         large
       />
       <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-1">
@@ -18,6 +19,14 @@ function SummaryCards({ income, investments, cashbox, totalExpenses, balance }) 
           tone="income"
           subtitle="Total de salários"
         />
+        {carryOver > 0 && (
+          <Card
+            title="Saldo Transferido"
+            value={formatCurrencyBRL(carryOver)}
+            tone="income"
+            subtitle="Do mês anterior"
+          />
+        )}
         <div className="grid gap-5 sm:grid-cols-2">
           <Card
             title="Despesas"

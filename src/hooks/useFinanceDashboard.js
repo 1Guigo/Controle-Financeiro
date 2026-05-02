@@ -196,6 +196,7 @@ export function useFinanceDashboard() {
       const prevBalance = prevTotals.balance
       // Só transferir se positivo e se o mês atual ainda não tem carryOver definido
       if (prevBalance > 0 && (!monthData.carryOver || monthData.carryOver === 0)) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setFinanceByMonth((prev) => ({
           ...prev,
           [selectedMonth]: {
@@ -205,7 +206,7 @@ export function useFinanceDashboard() {
         }))
       }
     }
-  }, [selectedMonth, financeByMonth, monthData.carryOver])
+  }, [selectedMonth, financeByMonth])
 
   useEffect(() => {
     saveAppState(financeByMonth)
@@ -304,51 +305,6 @@ export function useFinanceDashboard() {
     updateSelectedMonthData((current) => ({
       ...current,
       incomes: (current.incomes || []).filter((inc) => inc.id !== id),
-    }))
-  }
-
-  function handleIncomeInputChange(type, value) {
-    setIncomeInputByMonth((prev) => ({ ...prev, [`${selectedMonth}_${type}`]: value }))
-  }
-
-  function handleSaveIncome() {
-    const midMonth = clampToMoney(incomeInputMid)
-    const endMonth = clampToMoney(incomeInputEnd)
-    updateSelectedMonthData((current) => ({
-      ...current,
-      incomeMidMonth: midMonth,
-      incomeMidMonthDate: incomeDateInputMid,
-      incomeEndMonth: endMonth,
-      incomeEndMonthDate: incomeDateInputEnd,
-    }))
-    setIncomeInputByMonth((prev) => ({
-      ...prev,
-      [`${selectedMonth}_mid`]: midMonth ? String(midMonth) : '',
-      [`${selectedMonth}_end`]: endMonth ? String(endMonth) : '',
-    }))
-  }
-
-  function handleIncomeDateChange(type, value) {
-    setIncomeDateByMonth((prev) => ({ ...prev, [`${selectedMonth}_${type}`]: value }))
-  }
-
-  function handleClearIncome() {
-    updateSelectedMonthData((current) => ({
-      ...current,
-      incomeMidMonth: 0,
-      incomeMidMonthDate: '',
-      incomeEndMonth: 0,
-      incomeEndMonthDate: '',
-    }))
-    setIncomeInputByMonth((prev) => ({
-      ...prev,
-      [`${selectedMonth}_mid`]: '',
-      [`${selectedMonth}_end`]: '',
-    }))
-    setIncomeDateByMonth((prev) => ({
-      ...prev,
-      [`${selectedMonth}_mid`]: '',
-      [`${selectedMonth}_end`]: '',
     }))
   }
 
@@ -521,6 +477,7 @@ export function useFinanceDashboard() {
               category: expenseForm.category,
               amount,
               date: expenseForm.date,
+              isInstallment,
               installmentsTotal,
               installmentsPaid,
               isFixed: Boolean(expenseForm.isFixed),

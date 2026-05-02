@@ -14,16 +14,33 @@ export function clampToMoney(value) {
 
 export function calculateTotals(monthData) {
   const incomes = Array.isArray(monthData?.incomes) ? monthData.incomes : []
+  
+  // Receitas: salário, vale, outros
   const income = clampToMoney(
-    incomes.reduce((acc, inc) => acc + clampToMoney(inc.amount || 0), 0),
+    incomes
+      .filter((inc) => !['finanças', 'caixinha'].includes(inc.type))
+      .reduce((acc, inc) => acc + clampToMoney(inc.amount || 0), 0),
   )
   
+  // Investimentos: finanças + investimentos existentes
+  const financesFromIncomes = clampToMoney(
+    incomes
+      .filter((inc) => inc.type === 'finanças')
+      .reduce((acc, inc) => acc + clampToMoney(inc.amount || 0), 0),
+  )
   const investmentsList = Array.isArray(monthData?.investments) ? monthData.investments : []
   const totalInvestments = clampToMoney(
+    financesFromIncomes +
     investmentsList.reduce((acc, inv) => acc + clampToMoney(inv.valor ?? inv.amount ?? 0), 0),
   )
   
-  const cashbox = clampToMoney(monthData?.cashbox ?? 0)
+  // Caixinha: caixinha + cashbox existente
+  const cashboxFromIncomes = clampToMoney(
+    incomes
+      .filter((inc) => inc.type === 'caixinha')
+      .reduce((acc, inc) => acc + clampToMoney(inc.amount || 0), 0),
+  )
+  const cashbox = clampToMoney(cashboxFromIncomes + clampToMoney(monthData?.cashbox ?? 0))
   
   const expenses = Array.isArray(monthData?.expenses) ? monthData.expenses : []
   const totalExpenses = clampToMoney(

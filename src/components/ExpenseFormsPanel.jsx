@@ -53,6 +53,8 @@ function ExpenseFormsPanel({
               >
                 <option value="salário">Salário</option>
                 <option value="vale">Vale</option>
+                <option value="finanças">Finanças</option>
+                <option value="caixinha">Caixinha</option>
                 <option value="outros">Outros</option>
               </select>
               <input
@@ -100,6 +102,8 @@ function ExpenseFormsPanel({
               >
                 <option value="salário">Salário</option>
                 <option value="vale">Vale</option>
+                <option value="finanças">Finanças</option>
+                <option value="caixinha">Caixinha</option>
                 <option value="outros">Outros</option>
               </select>
               <input
@@ -179,6 +183,46 @@ function ExpenseFormsPanel({
                 onChange={(e) => onExpenseFieldChange('date', e.target.value)}
                 className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
               />
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={Boolean(expenseForm.isInstallment)}
+                  onChange={(e) => onExpenseFieldChange('isInstallment', e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                Parcelado
+              </label>
+              {expenseForm.isInstallment && (
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    min="2"
+                    step="1"
+                    placeholder="Total parcelas"
+                    value={expenseForm.installmentsTotal}
+                    onChange={(e) => onExpenseFieldChange('installmentsTotal', e.target.value)}
+                    className="w-24 rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    placeholder="Pagas"
+                    value={expenseForm.installmentsPaid}
+                    onChange={(e) => onExpenseFieldChange('installmentsPaid', e.target.value)}
+                    className="w-24 rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+              )}
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={Boolean(expenseForm.isFixed)}
+                  onChange={(e) => onExpenseFieldChange('isFixed', e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                Despesa fixa
+              </label>
               <div className="flex gap-2">
                 <button
                   onClick={onSaveEditExpense}

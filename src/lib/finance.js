@@ -13,9 +13,10 @@ export function clampToMoney(value) {
 }
 
 export function calculateTotals(monthData) {
-  const incomeMidMonth = clampToMoney(monthData?.incomeMidMonth ?? 0)
-  const incomeEndMonth = clampToMoney(monthData?.incomeEndMonth ?? 0)
-  const income = clampToMoney(incomeMidMonth + incomeEndMonth)
+  const incomes = Array.isArray(monthData?.incomes) ? monthData.incomes : []
+  const income = clampToMoney(
+    incomes.reduce((acc, inc) => acc + clampToMoney(inc.amount || 0), 0),
+  )
   
   const investmentsList = Array.isArray(monthData?.investments) ? monthData.investments : []
   const totalInvestments = clampToMoney(

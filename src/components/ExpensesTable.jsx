@@ -4,6 +4,7 @@ import { getCategoryColor } from '../lib/categories'
 function ExpensesTable({
   expenses,
   onRemoveExpense,
+  onEditExpense,
   onSetInstallmentsPaid,
   onClearAllExpenses,
 }) {
@@ -113,13 +114,22 @@ function ExpensesTable({
                       {formatCurrencyBRL(expense.amount)}
                     </td>
                     <td className="px-3 py-3">
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveExpenseClick(expense.id)}
-                        className="rounded-md bg-rose-500/20 px-3 py-1.5 text-rose-200 transition hover:bg-rose-500/30"
-                      >
-                        Remover
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => onEditExpense(expense.id)}
+                          className="rounded-md bg-indigo-500/20 px-3 py-1.5 text-indigo-200 transition hover:bg-indigo-500/30"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveExpenseClick(expense.id)}
+                          className="rounded-md bg-rose-500/20 px-3 py-1.5 text-rose-200 transition hover:bg-rose-500/30"
+                        >
+                          Remover
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 )

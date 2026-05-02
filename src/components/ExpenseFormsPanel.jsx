@@ -1,28 +1,23 @@
 import ExpenseForm from './ExpenseForm'
-import IncomeForm from './IncomeForm'
 import { getCategoryColor } from '../lib/categories'
 
 function ExpenseFormsPanel({
-  incomeInputMid,
-  incomeInputEnd,
-  incomeDateInputMid,
-  incomeDateInputEnd,
-  investmentForm,
-  investmentsList,
-  cashboxInput,
+  incomes,
+  incomeForm,
+  editingIncomeId,
+  editingExpenseId,
   expenseForm,
   categories,
-  onIncomeInputChange,
-  onIncomeDateChange,
-  onInvestmentFormChange,
-  onAddInvestment,
-  onRemoveInvestment,
-  onCashboxInputChange,
-  onSaveCashbox,
-  onIncomeSubmit,
-  onIncomeClear,
+  onIncomeFormChange,
+  onAddIncome,
+  onEditIncome,
+  onSaveEditIncome,
+  onCancelEditIncome,
+  onRemoveIncome,
   onExpenseFieldChange,
-  onExpenseSubmit,
+  onAddExpense,
+  onSaveEditExpense,
+  onCancelEditExpense,
 }) {
   return (
     <div
@@ -31,31 +26,184 @@ function ExpenseFormsPanel({
     >
       <h2 className="mb-5 text-xl font-semibold tracking-tight text-slate-900">Lançamentos</h2>
       <div className="space-y-5">
-        <IncomeForm
-          incomeInputMid={incomeInputMid}
-          incomeInputEnd={incomeInputEnd}
-          incomeDateInputMid={incomeDateInputMid}
-          incomeDateInputEnd={incomeDateInputEnd}
-          investmentForm={investmentForm}
-          investmentsList={investmentsList}
-          cashboxInput={cashboxInput}
-          onIncomeInputChange={onIncomeInputChange}
-          onIncomeDateChange={onIncomeDateChange}
-          onInvestmentFormChange={onInvestmentFormChange}
-          onAddInvestment={onAddInvestment}
-          onRemoveInvestment={onRemoveInvestment}
-          onCashboxInputChange={onCashboxInputChange}
-          onSaveCashbox={onSaveCashbox}
-          onSubmit={onIncomeSubmit}
-          onClearIncome={onIncomeClear}
-        />
-        <ExpenseForm
-          categories={categories}
-          formData={expenseForm}
-          getCategoryColor={getCategoryColor}
-          onFieldChange={onExpenseFieldChange}
-          onSubmit={onExpenseSubmit}
-        />
+        {/* Formulário de Entrada de Dinheiro */}
+        <div className="rounded-lg border border-slate-200 bg-white p-4">
+          <h3 className="mb-3 text-lg font-medium text-slate-900">Entrada de Dinheiro</h3>
+          {editingIncomeId ? (
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder="Nome/Descrição"
+                value={incomeForm.name}
+                onChange={(e) => onIncomeFormChange('name', e.target.value)}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+              />
+              <input
+                type="number"
+                step="0.01"
+                placeholder="Valor"
+                value={incomeForm.amount}
+                onChange={(e) => onIncomeFormChange('amount', e.target.value)}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+              />
+              <select
+                value={incomeForm.type}
+                onChange={(e) => onIncomeFormChange('type', e.target.value)}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+              >
+                <option value="salário">Salário</option>
+                <option value="vale">Vale</option>
+                <option value="outros">Outros</option>
+              </select>
+              <input
+                type="date"
+                value={incomeForm.date}
+                onChange={(e) => onIncomeFormChange('date', e.target.value)}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={onSaveEditIncome}
+                  className="rounded-md bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-600"
+                >
+                  Salvar
+                </button>
+                <button
+                  onClick={onCancelEditIncome}
+                  className="rounded-md bg-gray-500 px-4 py-2 text-sm font-medium text-white hover:bg-gray-600"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder="Nome/Descrição"
+                value={incomeForm.name}
+                onChange={(e) => onIncomeFormChange('name', e.target.value)}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+              />
+              <input
+                type="number"
+                step="0.01"
+                placeholder="Valor"
+                value={incomeForm.amount}
+                onChange={(e) => onIncomeFormChange('amount', e.target.value)}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+              />
+              <select
+                value={incomeForm.type}
+                onChange={(e) => onIncomeFormChange('type', e.target.value)}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+              >
+                <option value="salário">Salário</option>
+                <option value="vale">Vale</option>
+                <option value="outros">Outros</option>
+              </select>
+              <input
+                type="date"
+                value={incomeForm.date}
+                onChange={(e) => onIncomeFormChange('date', e.target.value)}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+              />
+              <button
+                onClick={onAddIncome}
+                className="w-full rounded-md bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-600"
+              >
+                Adicionar Entrada
+              </button>
+            </div>
+          )}
+          {/* Lista de Entradas */}
+          <div className="mt-4 space-y-2">
+            {incomes.map((income) => (
+              <div key={income.id} className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 p-3">
+                <div>
+                  <p className="text-sm font-medium text-slate-900">{income.name}</p>
+                  <p className="text-xs text-slate-500">{income.type} - {income.date}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-slate-900">R$ {income.amount.toFixed(2)}</span>
+                  <button
+                    onClick={() => onEditIncome(income.id)}
+                    className="text-indigo-500 hover:text-indigo-700"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => onRemoveIncome(income.id)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    Remover
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Formulário de Despesa */}
+        <div className="rounded-lg border border-slate-200 bg-white p-4">
+          <h3 className="mb-3 text-lg font-medium text-slate-900">Despesa</h3>
+          {editingExpenseId ? (
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder="Descrição"
+                value={expenseForm.description}
+                onChange={(e) => onExpenseFieldChange('description', e.target.value)}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+              />
+              <select
+                value={expenseForm.category}
+                onChange={(e) => onExpenseFieldChange('category', e.target.value)}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+              >
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+              <input
+                type="number"
+                step="0.01"
+                placeholder="Valor"
+                value={expenseForm.amount}
+                onChange={(e) => onExpenseFieldChange('amount', e.target.value)}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+              />
+              <input
+                type="date"
+                value={expenseForm.date}
+                onChange={(e) => onExpenseFieldChange('date', e.target.value)}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={onSaveEditExpense}
+                  className="rounded-md bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-600"
+                >
+                  Salvar
+                </button>
+                <button
+                  onClick={onCancelEditExpense}
+                  className="rounded-md bg-gray-500 px-4 py-2 text-sm font-medium text-white hover:bg-gray-600"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          ) : (
+            <ExpenseForm
+              categories={categories}
+              formData={expenseForm}
+              getCategoryColor={getCategoryColor}
+              onFieldChange={onExpenseFieldChange}
+              onSubmit={onAddExpense}
+            />
+          )}
+        </div>
       </div>
     </div>
   )

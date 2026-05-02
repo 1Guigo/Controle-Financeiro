@@ -47,31 +47,38 @@ function App() {
 
       <section className="mt-10 grid grid-cols-1 gap-6 2xl:grid-cols-[1fr_1.3fr]">
         <ExpenseFormsPanel
-          incomeInputMid={data.incomeInputMid}
-          incomeInputEnd={data.incomeInputEnd}
-          incomeDateInputMid={data.incomeDateInputMid}
-          incomeDateInputEnd={data.incomeDateInputEnd}
+          incomes={data.incomes}
+          incomeForm={data.incomeForm}
+          editingIncomeId={data.editingIncomeId}
+          editingExpenseId={data.editingExpenseId}
+          expenseForm={data.expenseForm}
+          categories={data.categories}
           investmentForm={data.investmentForm}
           investmentsList={data.monthData.investments}
           cashboxInput={data.cashboxInput}
-          expenseForm={data.expenseForm}
-          categories={data.categories}
-          onIncomeInputChange={data.handleIncomeInputChange}
-          onIncomeDateChange={data.handleIncomeDateChange}
+          onIncomeFormChange={data.handleIncomeFormChange}
+          onAddIncome={data.handleAddIncome}
+          onEditIncome={data.handleEditIncome}
+          onSaveEditIncome={data.handleSaveEditIncome}
+          onCancelEditIncome={data.handleCancelEditIncome}
+          onRemoveIncome={data.handleRemoveIncome}
           onInvestmentFormChange={data.handleInvestmentFormChange}
           onAddInvestment={data.handleAddInvestment}
           onRemoveInvestment={data.handleRemoveInvestment}
           onCashboxInputChange={data.handleCashboxInputChange}
           onSaveCashbox={data.handleSaveCashbox}
-          onIncomeSubmit={data.handleSaveIncome}
-          onIncomeClear={data.handleClearIncome}
           onExpenseFieldChange={data.handleExpenseFieldChange}
-          onExpenseSubmit={data.handleAddExpense}
+          onAddExpense={data.handleAddExpense}
+          onEditExpense={data.handleEditExpense}
+          onSaveEditExpense={data.handleSaveEditExpense}
+          onCancelEditExpense={data.handleCancelEditExpense}
+          onRemoveExpense={data.handleRemoveExpense}
         />
 
         <ExpensesTable
           expenses={data.monthData.expenses}
           onRemoveExpense={data.handleRemoveExpense}
+          onEditExpense={data.handleEditExpense}
           onSetInstallmentsPaid={data.handleSetInstallmentsPaid}
           onClearAllExpenses={data.handleClearAllExpenses}
         />

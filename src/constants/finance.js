@@ -10,10 +10,7 @@ export const CATEGORIES = [
 ]
 
 export const DEFAULT_MONTH_DATA = {
-  incomeMidMonth: 0,
-  incomeMidMonthDate: '',
-  incomeEndMonth: 0,
-  incomeEndMonthDate: '',
+  incomes: [],
   investments: [],
   cashbox: 0,
   expenses: [],

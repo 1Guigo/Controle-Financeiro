@@ -36,11 +36,31 @@ function mergeSavedState(savedState) {
       investments = [{ id: crypto.randomUUID(), nome: 'Investimento', valor: clampToMoney(data.investments) }]
     }
     
+    // Migração de incomes
+    let incomes = []
+    const midIncome = clampToMoney(data.incomeMidMonth ?? data.income ?? 0)
+    if (midIncome > 0) {
+      incomes.push({
+        id: crypto.randomUUID(),
+        name: 'Salário Meio do Mês',
+        amount: midIncome,
+        type: 'salário',
+        date: String(data.incomeMidMonthDate || data.incomeDate || ''),
+      })
+    }
+    const endIncome = clampToMoney(data.incomeEndMonth ?? 0)
+    if (endIncome > 0) {
+      incomes.push({
+        id: crypto.randomUUID(),
+        name: 'Salário Final do Mês',
+        amount: endIncome,
+        type: 'salário',
+        date: String(data.incomeEndMonthDate || ''),
+      })
+    }
+    
     base[month.key] = {
-      incomeMidMonth: clampToMoney(data.incomeMidMonth ?? data.income ?? 0),
-      incomeMidMonthDate: String(data.incomeMidMonthDate || data.incomeDate || ''),
-      incomeEndMonth: clampToMoney(data.incomeEndMonth ?? 0),
-      incomeEndMonthDate: String(data.incomeEndMonthDate || ''),
+      incomes,
       investments,
       cashbox: clampToMoney(data.cashbox ?? 0),
       manualBalance: data.manualBalance !== undefined ? clampToMoney(data.manualBalance) : null,
@@ -70,24 +90,6 @@ function mergeSavedState(savedState) {
   }
 
   return base
-}
-
-function getIncomeDrafts(financeByMonth) {
-  return MONTHS.reduce((acc, month) => {
-    const midMonth = financeByMonth[month.key]?.incomeMidMonth ?? 0
-    const endMonth = financeByMonth[month.key]?.incomeEndMonth ?? 0
-    acc[`${month.key}_mid`] = midMonth ? String(midMonth) : ''
-    acc[`${month.key}_end`] = endMonth ? String(endMonth) : ''
-    return acc
-  }, {})
-}
-
-function getIncomeDateDrafts(financeByMonth) {
-  return MONTHS.reduce((acc, month) => {
-    acc[`${month.key}_mid`] = String(financeByMonth[month.key]?.incomeMidMonthDate || '')
-    acc[`${month.key}_end`] = String(financeByMonth[month.key]?.incomeEndMonthDate || '')
-    return acc
-  }, {})
 }
 
 function getInvestmentsDrafts() {
@@ -122,12 +124,6 @@ export function useFinanceDashboard() {
 
   const [selectedMonth, setSelectedMonth] = useState(currentMonthKey)
   const [financeByMonth, setFinanceByMonth] = useState(initialFinance)
-  const [incomeInputByMonth, setIncomeInputByMonth] = useState(() =>
-    getIncomeDrafts(initialFinance),
-  )
-  const [incomeDateByMonth, setIncomeDateByMonth] = useState(() =>
-    getIncomeDateDrafts(initialFinance),
-  )
   const [investmentFormByMonth, setInvestmentFormByMonth] = useState(() =>
     getInvestmentsDrafts(initialFinance),
   )
@@ -137,6 +133,14 @@ export function useFinanceDashboard() {
   const [manualBalanceInputByMonth, setManualBalanceInputByMonth] = useState(() =>
     getManualBalanceDrafts(initialFinance),
   )
+  const [incomeForm, setIncomeForm] = useState({
+    name: '',
+    amount: '',
+    type: 'salário',
+    date: '',
+  })
+  const [editingIncomeId, setEditingIncomeId] = useState(null)
+  const [editingExpenseId, setEditingExpenseId] = useState(null)
   const [expenseForm, setExpenseForm] = useState({
     description: '',
     category: getCategoryNames()[0],
@@ -154,10 +158,7 @@ export function useFinanceDashboard() {
   )
 
   const monthData = financeByMonth[selectedMonth] || DEFAULT_MONTH_DATA
-  const incomeInputMid = incomeInputByMonth[`${selectedMonth}_mid`] ?? ''
-  const incomeInputEnd = incomeInputByMonth[`${selectedMonth}_end`] ?? ''
-  const incomeDateInputMid = incomeDateByMonth[`${selectedMonth}_mid`] ?? ''
-  const incomeDateInputEnd = incomeDateByMonth[`${selectedMonth}_end`] ?? ''
+  const incomes = monthData.incomes || []
   const investmentForm = investmentFormByMonth[selectedMonth] ?? { name: '', valor: '' }
   const cashboxInput = cashboxInputByMonth[selectedMonth] ?? ''
   const manualBalanceInput = manualBalanceInputByMonth[selectedMonth] ?? ''
@@ -214,6 +215,95 @@ export function useFinanceDashboard() {
     setFinanceByMonth((prev) => ({
       ...prev,
       [selectedMonth]: updater(prev[selectedMonth] || DEFAULT_MONTH_DATA),
+    }))
+  }
+
+  function handleIncomeFormChange(field, value) {
+    setIncomeForm((prev) => ({ ...prev, [field]: value }))
+  }
+
+  function handleAddIncome() {
+    if (!incomeForm.name.trim() || !incomeForm.amount) return
+    const amount = clampToMoney(incomeForm.amount)
+    if (amount <= 0) return
+
+    const newIncome = {
+      id: crypto.randomUUID(),
+      name: incomeForm.name.trim(),
+      amount,
+      type: incomeForm.type,
+      date: incomeForm.date,
+    }
+
+    updateSelectedMonthData((current) => ({
+      ...current,
+      incomes: [...(current.incomes || []), newIncome],
+    }))
+
+    setIncomeForm({
+      name: '',
+      amount: '',
+      type: 'salário',
+      date: '',
+    })
+  }
+
+  function handleEditIncome(id) {
+    const income = incomes.find((inc) => inc.id === id)
+    if (income) {
+      setIncomeForm({
+        name: income.name,
+        amount: String(income.amount),
+        type: income.type,
+        date: income.date,
+      })
+      setEditingIncomeId(id)
+    }
+  }
+
+  function handleSaveEditIncome() {
+    if (!editingIncomeId) return
+    const amount = clampToMoney(incomeForm.amount)
+    if (amount <= 0) return
+
+    updateSelectedMonthData((current) => ({
+      ...current,
+      incomes: (current.incomes || []).map((inc) =>
+        inc.id === editingIncomeId
+          ? {
+              ...inc,
+              name: incomeForm.name.trim(),
+              amount,
+              type: incomeForm.type,
+              date: incomeForm.date,
+            }
+          : inc
+      ),
+    }))
+
+    setIncomeForm({
+      name: '',
+      amount: '',
+      type: 'salário',
+      date: '',
+    })
+    setEditingIncomeId(null)
+  }
+
+  function handleCancelEditIncome() {
+    setIncomeForm({
+      name: '',
+      amount: '',
+      type: 'salário',
+      date: '',
+    })
+    setEditingIncomeId(null)
+  }
+
+  function handleRemoveIncome(id) {
+    updateSelectedMonthData((current) => ({
+      ...current,
+      incomes: (current.incomes || []).filter((inc) => inc.id !== id),
     }))
   }
 
@@ -392,6 +482,80 @@ export function useFinanceDashboard() {
     }))
   }
 
+  function handleEditExpense(id) {
+    const expense = monthData.expenses.find((exp) => exp.id === id)
+    if (expense) {
+      setExpenseForm({
+        description: expense.description,
+        category: expense.category,
+        amount: String(expense.amount),
+        date: expense.date,
+        isInstallment: expense.installmentsTotal > 1,
+        installmentsTotal: expense.installmentsTotal,
+        installmentsPaid: expense.installmentsPaid,
+        isFixed: expense.isFixed,
+      })
+      setEditingExpenseId(id)
+    }
+  }
+
+  function handleSaveEditExpense() {
+    if (!editingExpenseId) return
+    const amount = clampToMoney(expenseForm.amount)
+    if (amount <= 0) return
+
+    const isInstallment = Boolean(expenseForm.isInstallment)
+    const installmentsTotal = isInstallment ? Math.max(2, Number(expenseForm.installmentsTotal || 2)) : 1
+    const installmentsPaidRaw = isInstallment ? Number(expenseForm.installmentsPaid || 0) : 0
+    const installmentsPaid = isInstallment
+      ? Math.min(Math.max(0, installmentsPaidRaw), installmentsTotal)
+      : 0
+
+    updateSelectedMonthData((current) => ({
+      ...current,
+      expenses: (current.expenses || []).map((exp) =>
+        exp.id === editingExpenseId
+          ? {
+              ...exp,
+              description: expenseForm.description.trim(),
+              category: expenseForm.category,
+              amount,
+              date: expenseForm.date,
+              installmentsTotal,
+              installmentsPaid,
+              isFixed: Boolean(expenseForm.isFixed),
+            }
+          : exp
+      ),
+    }))
+
+    setExpenseForm({
+      description: '',
+      category: getCategoryNames()[0],
+      amount: '',
+      date: '',
+      isInstallment: false,
+      installmentsTotal: 2,
+      installmentsPaid: 0,
+      isFixed: false,
+    })
+    setEditingExpenseId(null)
+  }
+
+  function handleCancelEditExpense() {
+    setExpenseForm({
+      description: '',
+      category: getCategoryNames()[0],
+      amount: '',
+      date: '',
+      isInstallment: false,
+      installmentsTotal: 2,
+      installmentsPaid: 0,
+      isFixed: false,
+    })
+    setEditingExpenseId(null)
+  }
+
   function handleClearAllExpenses() {
     updateSelectedMonthData((current) => ({
       ...current,
@@ -419,11 +583,11 @@ export function useFinanceDashboard() {
     setSelectedMonth,
     monthLabel,
     monthData,
-    incomeInputMid,
-    incomeInputEnd,
+    incomes,
+    incomeForm,
+    editingIncomeId,
+    editingExpenseId,
     expenseForm,
-    incomeDateInputMid,
-    incomeDateInputEnd,
     investmentForm,
     cashboxInput,
     manualBalanceInput,
@@ -436,10 +600,12 @@ export function useFinanceDashboard() {
     carryOver,
     categoryData,
     usageData,
-    handleIncomeInputChange,
-    handleIncomeDateChange,
-    handleSaveIncome,
-    handleClearIncome,
+    handleIncomeFormChange,
+    handleAddIncome,
+    handleEditIncome,
+    handleSaveEditIncome,
+    handleCancelEditIncome,
+    handleRemoveIncome,
     handleInvestmentFormChange,
     handleAddInvestment,
     handleRemoveInvestment,
@@ -450,6 +616,9 @@ export function useFinanceDashboard() {
     handleClearManualBalance,
     handleExpenseFieldChange,
     handleAddExpense,
+    handleEditExpense,
+    handleSaveEditExpense,
+    handleCancelEditExpense,
     handleRemoveExpense,
     handleClearAllExpenses,
     handleSetInstallmentsPaid,

@@ -33,17 +33,19 @@ function App() {
         onAddExpenseClick={scrollToExpenseForm}
       />
 
-      <SummaryCards
-        income={data.income}
-        investments={data.totalInvestments}
-        cashbox={data.cashbox}
-        totalExpenses={data.totalExpenses}
-        balance={data.balance}
-        calculatedBalance={data.calculatedBalance}
-        carryOver={data.carryOver}
-      />
+      <section className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 lg:col-span-2">
+          <SummaryCards
+            income={data.income}
+            investments={data.totalInvestments}
+            cashbox={data.cashbox}
+            totalExpenses={data.totalExpenses}
+            carryOver={data.carryOver}
+          />
+        </div>
 
-      <ChartsSection categoryData={data.categoryData} />
+        <ChartsSection categoryData={data.categoryData} />
+      </section>
 
       <section className="mt-10 grid grid-cols-1 gap-6 2xl:grid-cols-[1fr_1.3fr]">
         <ExpenseFormsPanel

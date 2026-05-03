@@ -5,10 +5,10 @@ const toneClasses = {
   balanceNegative: 'text-amber-600',
 }
 
-function Card({ title, value, subtitle, tone = 'balancePositive', large = false }) {
+function Card({ title, value, subtitle, tone = 'balancePositive', large = false, compact = false }) {
   return (
     <article
-      className={`app-surface fade-up p-6 ${
+      className={`app-surface fade-up ${compact ? 'p-4' : 'p-6'} ${
         toneClasses[tone] || toneClasses.balancePositive
       }`}
     >

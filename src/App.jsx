@@ -43,7 +43,7 @@ function App() {
         carryOver={data.carryOver}
       />
 
-      <ChartsSection categoryData={data.categoryData} usageData={data.usageData} />
+      <ChartsSection categoryData={data.categoryData} />
 
       <section className="mt-10 grid grid-cols-1 gap-6 2xl:grid-cols-[1fr_1.3fr]">
         <ExpenseFormsPanel

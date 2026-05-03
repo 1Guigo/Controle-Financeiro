@@ -10,7 +10,7 @@ function SummaryCards({ income, investments, cashbox, totalExpenses, balance, ca
         value={formatCurrencyBRL(balance)}
         tone={balance >= 0 ? 'balancePositive' : 'balanceNegative'}
         subtitle={isManualBalance ? 'Saldo manual definido' : (balance >= 0 ? 'Dentro do planejado' : 'Atenção ao orçamento')}
-        large
+        compact
       />
       <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-1">
         <Card

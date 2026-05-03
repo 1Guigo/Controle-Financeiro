@@ -9,91 +9,123 @@ import { getCategoryColor, getCategoryNames } from '../lib/categories'
 import { MONTHS } from '../lib/months'
 import { loadAppState, saveAppState } from '../lib/storage'
 
-function getInitialFinanceByMonth() {
-  return MONTHS.reduce((acc, month) => {
+function buildMonthOptions(year = new Date().getFullYear()) {
+  return MONTHS.map((month) => ({
+    key: `${year}-${month.key}`,
+    label: month.label,
+  }))
+}
+
+function normalizeMonthKey(key, year = new Date().getFullYear()) {
+  if (typeof key !== 'string') return ''
+  if (/^\d{4}-\d{2}$/.test(key)) return key
+  if (/^\d{2}$/.test(key)) return `${year}-${key}`
+  return key
+}
+
+function getPreviousMonthKey(yearMonth) {
+  const [year, month] = String(yearMonth).split('-').map(Number)
+  if (!Number.isFinite(year) || !Number.isFinite(month)) return yearMonth
+  const date = new Date(year, month - 1, 1)
+  date.setMonth(date.getMonth() - 1)
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+}
+
+function getInitialFinanceByMonth(monthOptions) {
+  return monthOptions.reduce((acc, month) => {
     acc[month.key] = { ...DEFAULT_MONTH_DATA }
     return acc
   }, {})
 }
 
-function mergeSavedState(savedState) {
-  const base = getInitialFinanceByMonth()
-  if (!savedState || typeof savedState !== 'object') return base
+function migrateMonthData(data) {
+  if (!data || typeof data !== 'object') return { ...DEFAULT_MONTH_DATA }
 
-  for (const month of MONTHS) {
-    const data = savedState[month.key]
-    if (!data || typeof data !== 'object') continue
-    
-    // Migração de investimentos antigos (número para array)
-    let investments = []
-    if (Array.isArray(data.investments)) {
-      investments = data.investments.map((inv) => ({
-        id: String(inv.id || crypto.randomUUID()),
-        nome: String(inv.nome || inv.name || ''),
-        valor: clampToMoney(inv.valor || inv.amount || 0),
-      }))
-    } else if (typeof data.investments === 'number' && data.investments > 0) {
-      investments = [{ id: crypto.randomUUID(), nome: 'Investimento', valor: clampToMoney(data.investments) }]
-    }
-    
-    // Migração de incomes
-    let incomes = []
-    const midIncome = clampToMoney(data.incomeMidMonth ?? data.income ?? 0)
-    if (midIncome > 0) {
-      incomes.push({
-        id: crypto.randomUUID(),
-        name: 'Salário Meio do Mês',
-        amount: midIncome,
-        type: 'salário',
-        date: String(data.incomeMidMonthDate || data.incomeDate || ''),
-      })
-    }
-    const endIncome = clampToMoney(data.incomeEndMonth ?? 0)
-    if (endIncome > 0) {
-      incomes.push({
-        id: crypto.randomUUID(),
-        name: 'Salário Final do Mês',
-        amount: endIncome,
-        type: 'salário',
-        date: String(data.incomeEndMonthDate || ''),
-      })
-    }
-    
-    base[month.key] = {
-      incomes,
-      investments,
-      cashbox: clampToMoney(data.cashbox ?? 0),
-      manualBalance: data.manualBalance !== undefined ? clampToMoney(data.manualBalance) : null,
-      carryOver: clampToMoney(data.carryOver ?? 0),
-      expenses: Array.isArray(data.expenses)
-        ? data.expenses
-            .filter((expense) => expense && typeof expense === 'object')
-            .map((expense) => {
-              const installmentsTotal = Math.max(1, Number(expense.installmentsTotal || 1))
-              const installmentsPaid = Math.min(
-                Math.max(0, Number(expense.installmentsPaid || 0)),
-                installmentsTotal,
-              )
-              return {
-                id: String(expense.id || crypto.randomUUID()),
-                description: String(expense.description || 'Despesa'),
-                category: String(expense.category || 'Outros'),
-                amount: clampToMoney(expense.amount || 0),
-                date: String(expense.date || ''),
-                installmentsTotal,
-                installmentsPaid,
-                isFixed: Boolean(expense.isFixed || false),
-              }
-            })
-        : [],
+  let investments = []
+  if (Array.isArray(data.investments)) {
+    investments = data.investments.map((inv) => ({
+      id: String(inv.id || crypto.randomUUID()),
+      nome: String(inv.nome || inv.name || ''),
+      valor: clampToMoney(inv.valor || inv.amount || 0),
+    }))
+  } else if (typeof data.investments === 'number' && data.investments > 0) {
+    investments = [{ id: crypto.randomUUID(), nome: 'Investimento', valor: clampToMoney(data.investments) }]
+  }
+
+  const incomes = []
+  const midIncome = clampToMoney(data.incomeMidMonth ?? data.income ?? 0)
+  if (midIncome > 0) {
+    incomes.push({
+      id: crypto.randomUUID(),
+      name: 'Salário Meio do Mês',
+      amount: midIncome,
+      type: 'salário',
+      date: String(data.incomeMidMonthDate || data.incomeDate || ''),
+    })
+  }
+  const endIncome = clampToMoney(data.incomeEndMonth ?? 0)
+  if (endIncome > 0) {
+    incomes.push({
+      id: crypto.randomUUID(),
+      name: 'Salário Final do Mês',
+      amount: endIncome,
+      type: 'salário',
+      date: String(data.incomeEndMonthDate || ''),
+    })
+  }
+
+  return {
+    incomes,
+    investments,
+    cashbox: clampToMoney(data.cashbox ?? 0),
+    manualBalance: data.manualBalance !== undefined ? clampToMoney(data.manualBalance) : null,
+    carryOver: clampToMoney(data.carryOver ?? 0),
+    expenses: Array.isArray(data.expenses)
+      ? data.expenses
+          .filter((expense) => expense && typeof expense === 'object')
+          .map((expense) => {
+            const installmentsTotal = Math.max(1, Number(expense.installmentsTotal || 1))
+            const installmentsPaid = Math.min(
+              Math.max(0, Number(expense.installmentsPaid || 0)),
+              installmentsTotal,
+            )
+            return {
+              id: String(expense.id || crypto.randomUUID()),
+              description: String(expense.description || 'Despesa'),
+              category: String(expense.category || 'Outros'),
+              amount: clampToMoney(expense.amount || 0),
+              date: String(expense.date || ''),
+              installmentsTotal,
+              installmentsPaid,
+              isFixed: Boolean(expense.isFixed || false),
+            }
+          })
+      : [],
+  }
+}
+
+function mergeSavedState(savedState, monthOptions) {
+  const currentYear = new Date().getFullYear()
+  const financeByMonth = {}
+
+  if (savedState && typeof savedState === 'object') {
+    for (const [rawKey, monthData] of Object.entries(savedState)) {
+      if (!monthData || typeof monthData !== 'object') continue
+      const key = normalizeMonthKey(rawKey, currentYear)
+      if (!key) continue
+      financeByMonth[key] = migrateMonthData(monthData)
     }
   }
 
-  return base
+  const base = getInitialFinanceByMonth(monthOptions)
+  return Object.keys({ ...base, ...financeByMonth }).reduce((acc, key) => {
+    acc[key] = financeByMonth[key] || base[key] || { ...DEFAULT_MONTH_DATA }
+    return acc
+  }, {})
 }
 
-function getInvestmentsDrafts() {
-  return MONTHS.reduce((acc, month) => {
+function getInvestmentsDrafts(monthOptions) {
+  return monthOptions.reduce((acc, month) => {
     acc[month.key] = {
       name: '',
       valor: '',
@@ -102,16 +134,16 @@ function getInvestmentsDrafts() {
   }, {})
 }
 
-function getCashboxDrafts(financeByMonth) {
-  return MONTHS.reduce((acc, month) => {
+function getCashboxDrafts(financeByMonth, monthOptions) {
+  return monthOptions.reduce((acc, month) => {
     const cashbox = financeByMonth[month.key]?.cashbox ?? 0
     acc[month.key] = cashbox ? String(cashbox) : ''
     return acc
   }, {})
 }
 
-function getManualBalanceDrafts(financeByMonth) {
-  return MONTHS.reduce((acc, month) => {
+function getManualBalanceDrafts(financeByMonth, monthOptions) {
+  return monthOptions.reduce((acc, month) => {
     const manualBalance = financeByMonth[month.key]?.manualBalance
     acc[month.key] = manualBalance !== null && manualBalance !== undefined ? String(manualBalance) : ''
     return acc
@@ -119,19 +151,21 @@ function getManualBalanceDrafts(financeByMonth) {
 }
 
 export function useFinanceDashboard() {
-  const currentMonthKey = String(new Date().getMonth() + 1).padStart(2, '0')
-  const initialFinance = useMemo(() => mergeSavedState(loadAppState()), [])
+  const currentYear = new Date().getFullYear()
+  const monthOptions = useMemo(() => buildMonthOptions(currentYear), [currentYear])
+  const currentMonthKey = `${currentYear}-${String(new Date().getMonth() + 1).padStart(2, '0')}`
+  const initialFinance = useMemo(() => mergeSavedState(loadAppState(), monthOptions), [monthOptions])
 
   const [selectedMonth, setSelectedMonth] = useState(currentMonthKey)
   const [financeByMonth, setFinanceByMonth] = useState(initialFinance)
   const [investmentFormByMonth, setInvestmentFormByMonth] = useState(() =>
-    getInvestmentsDrafts(initialFinance),
+    getInvestmentsDrafts(monthOptions),
   )
   const [cashboxInputByMonth, setCashboxInputByMonth] = useState(() =>
-    getCashboxDrafts(initialFinance),
+    getCashboxDrafts(initialFinance, monthOptions),
   )
   const [manualBalanceInputByMonth, setManualBalanceInputByMonth] = useState(() =>
-    getManualBalanceDrafts(initialFinance),
+    getManualBalanceDrafts(initialFinance, monthOptions),
   )
   const [incomeForm, setIncomeForm] = useState({
     name: '',
@@ -153,8 +187,8 @@ export function useFinanceDashboard() {
   })
 
   const monthLabel = useMemo(
-    () => MONTHS.find((m) => m.key === selectedMonth)?.label || 'Mês',
-    [selectedMonth],
+    () => monthOptions.find((m) => m.key === selectedMonth)?.label || 'Mês',
+    [selectedMonth, monthOptions],
   )
 
   const monthData = financeByMonth[selectedMonth] || DEFAULT_MONTH_DATA
@@ -172,24 +206,9 @@ export function useFinanceDashboard() {
     [monthData.expenses],
   )
 
-  const usageData = useMemo(() => {
-    const spent = totalExpenses
-    const remaining = Math.max(income - totalExpenses, 0)
-    if (spent === 0 && remaining === 0) {
-      return [
-        { name: 'Gasto', value: 0 },
-        { name: 'Sobra', value: 0 },
-      ]
-    }
-    return [
-      { name: 'Gasto', value: clampToMoney(spent) },
-      { name: 'Sobra', value: clampToMoney(remaining) },
-    ]
-  }, [income, totalExpenses])
-
   useEffect(() => {
     // Transferir saldo do mês anterior como carryOver para o mês atual
-    const prevMonthKey = selectedMonth === '01' ? '12' : String(Number(selectedMonth) - 1).padStart(2, '0')
+    const prevMonthKey = getPreviousMonthKey(selectedMonth)
     const prevMonthData = financeByMonth[prevMonthKey]
     if (prevMonthData) {
       const prevTotals = calculateTotals(prevMonthData)
@@ -206,7 +225,7 @@ export function useFinanceDashboard() {
         }))
       }
     }
-  }, [selectedMonth, financeByMonth])
+  }, [selectedMonth, financeByMonth, monthData.carryOver])
 
   useEffect(() => {
     saveAppState(financeByMonth)
@@ -533,7 +552,7 @@ export function useFinanceDashboard() {
   }
 
   return {
-    months: MONTHS,
+    months: monthOptions,
     categories: getCategoryNames(),
     categoryMeta: CATEGORIES,
     selectedMonth,
@@ -556,7 +575,6 @@ export function useFinanceDashboard() {
     calculatedBalance,
     carryOver,
     categoryData,
-    usageData,
     handleIncomeFormChange,
     handleAddIncome,
     handleEditIncome,

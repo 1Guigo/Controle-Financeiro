@@ -515,7 +515,21 @@ export function useFinanceDashboard() {
   }
 
   function handleSave() {
-    saveAppState(financeByMonth)
+    const cashbox = clampToMoney(cashboxInput)
+    const updatedFinanceByMonth = {
+      ...financeByMonth,
+      [selectedMonth]: {
+        ...financeByMonth[selectedMonth],
+        cashbox,
+      },
+    }
+
+    setFinanceByMonth(updatedFinanceByMonth)
+    setCashboxInputByMonth((prev) => ({
+      ...prev,
+      [selectedMonth]: cashbox ? String(cashbox) : '',
+    }))
+    saveAppState(updatedFinanceByMonth)
     setIsDirty(false)
   }
 

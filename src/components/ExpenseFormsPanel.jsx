@@ -8,16 +8,20 @@ function ExpenseFormsPanel({
   editingExpenseId,
   expenseForm,
   categories,
+  cashboxInput,
   onIncomeFormChange,
   onAddIncome,
   onEditIncome,
   onSaveEditIncome,
   onCancelEditIncome,
   onRemoveIncome,
+  onCashboxInputChange,
+  onSaveCashbox,
   onExpenseFieldChange,
   onAddExpense,
   onSaveEditExpense,
   onCancelEditExpense,
+  onRemoveExpense,
 }) {
   return (
     <div
@@ -143,6 +147,27 @@ function ExpenseFormsPanel({
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-slate-200 bg-white p-4">
+          <h3 className="mb-3 text-lg font-medium text-slate-900">Caixinha</h3>
+          <div className="space-y-3">
+            <p className="text-sm text-slate-600">Salve o valor da caixinha para o mês selecionado.</p>
+            <input
+              type="number"
+              step="0.01"
+              placeholder="Valor da caixinha"
+              value={cashboxInput}
+              onChange={(e) => onCashboxInputChange(e.target.value)}
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+            />
+            <button
+              onClick={onSaveCashbox}
+              className="w-full rounded-md bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-600"
+            >
+              Salvar Caixinha
+            </button>
           </div>
         </div>
 

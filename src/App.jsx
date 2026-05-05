@@ -37,7 +37,6 @@ function App() {
         <div className="grid gap-6 lg:col-span-2">
           <SummaryCards
             income={data.income}
-            investments={data.totalInvestments}
             cashbox={data.cashbox}
             totalExpenses={data.totalExpenses}
             carryOver={data.carryOver}
@@ -55,8 +54,6 @@ function App() {
           editingExpenseId={data.editingExpenseId}
           expenseForm={data.expenseForm}
           categories={data.categories}
-          investmentForm={data.investmentForm}
-          investmentsList={data.monthData.investments}
           cashboxInput={data.cashboxInput}
           onIncomeFormChange={data.handleIncomeFormChange}
           onAddIncome={data.handleAddIncome}
@@ -64,9 +61,6 @@ function App() {
           onSaveEditIncome={data.handleSaveEditIncome}
           onCancelEditIncome={data.handleCancelEditIncome}
           onRemoveIncome={data.handleRemoveIncome}
-          onInvestmentFormChange={data.handleInvestmentFormChange}
-          onAddInvestment={data.handleAddInvestment}
-          onRemoveInvestment={data.handleRemoveInvestment}
           onCashboxInputChange={data.handleCashboxInputChange}
           onSaveCashbox={data.handleSaveCashbox}
           onExpenseFieldChange={data.handleExpenseFieldChange}

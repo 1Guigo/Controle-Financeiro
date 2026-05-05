@@ -15,23 +15,11 @@ export function clampToMoney(value) {
 export function calculateTotals(monthData) {
   const incomes = Array.isArray(monthData?.incomes) ? monthData.incomes : []
   
-  // Receitas: salário, vale, outros
+  // Receitas: salário, vale, outros (removido finanças de investimentos)
   const income = clampToMoney(
     incomes
-      .filter((inc) => !['finanças', 'caixinha'].includes(inc.type))
+      .filter((inc) => !['caixinha'].includes(inc.type)) // removido 'finanças'
       .reduce((acc, inc) => acc + clampToMoney(inc.amount || 0), 0),
-  )
-  
-  // Investimentos: finanças + investimentos existentes
-  const financesFromIncomes = clampToMoney(
-    incomes
-      .filter((inc) => inc.type === 'finanças')
-      .reduce((acc, inc) => acc + clampToMoney(inc.amount || 0), 0),
-  )
-  const investmentsList = Array.isArray(monthData?.investments) ? monthData.investments : []
-  const totalInvestments = clampToMoney(
-    financesFromIncomes +
-    investmentsList.reduce((acc, inv) => acc + clampToMoney(inv.valor ?? inv.amount ?? 0), 0),
   )
   
   // Caixinha: caixinha + cashbox existente
@@ -48,11 +36,12 @@ export function calculateTotals(monthData) {
   )
   
   const carryOver = clampToMoney(monthData?.carryOver ?? 0)
-  const calculatedBalance = clampToMoney(carryOver + income - totalExpenses - totalInvestments - cashbox)
-  const balance = monthData?.manualBalance !== null && monthData?.manualBalance !== undefined
+  const calculatedBalance = clampToMoney(carryOver + income - totalExpenses - cashbox)
+  const manualAdjustment = monthData?.manualBalance !== null && monthData?.manualBalance !== undefined
     ? clampToMoney(monthData.manualBalance)
-    : calculatedBalance
-  return { income, investments: totalInvestments, cashbox, totalExpenses, balance, calculatedBalance, carryOver }
+    : 0
+  const balance = clampToMoney(calculatedBalance + manualAdjustment)
+  return { income, cashbox, totalExpenses, balance, calculatedBalance, carryOver }
 }
 
 export function groupExpensesByCategory(expenses, getColor) {

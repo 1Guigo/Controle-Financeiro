@@ -53,7 +53,6 @@ function ExpenseFormsPanel({
               >
                 <option value="salário">Salário</option>
                 <option value="vale">Vale</option>
-                <option value="finanças">Finanças</option>
                 <option value="caixinha">Caixinha</option>
                 <option value="outros">Outros</option>
               </select>
@@ -102,7 +101,6 @@ function ExpenseFormsPanel({
               >
                 <option value="salário">Salário</option>
                 <option value="vale">Vale</option>
-                <option value="finanças">Finanças</option>
                 <option value="caixinha">Caixinha</option>
                 <option value="outros">Outros</option>
               </select>

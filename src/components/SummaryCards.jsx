@@ -1,7 +1,7 @@
 import Card from './Card'
 import { formatCurrencyBRL } from '../lib/finance'
 
-function SummaryCards({ income, investments, cashbox, totalExpenses, carryOver }) {
+function SummaryCards({ income, cashbox, totalExpenses, carryOver }) {
   return (
     <section className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
       <Card
@@ -23,12 +23,6 @@ function SummaryCards({ income, investments, cashbox, totalExpenses, carryOver }
         value={formatCurrencyBRL(totalExpenses)}
         tone="expense"
         subtitle="Soma de todos os lançamentos"
-      />
-      <Card
-        title="Investimentos"
-        value={formatCurrencyBRL(investments)}
-        tone="income"
-        subtitle="Valor alocado"
       />
       <Card
         title="Caixinha"

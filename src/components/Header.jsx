@@ -34,7 +34,7 @@ function Header({ monthLabel, balance, calculatedBalance, manualBalanceInput, on
                 value={manualBalanceInput}
                 onChange={(e) => onManualBalanceInputChange(e.target.value)}
                 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl bg-transparent border-b-2 border-indigo-500 focus:outline-none"
-                placeholder="Saldo manual"
+                placeholder="Ajuste manual (ex: 100 ou -50)"
               />
               <div className="mt-2 flex gap-2">
                 <button
@@ -53,7 +53,7 @@ function Header({ monthLabel, balance, calculatedBalance, manualBalanceInput, on
                   onClick={handleClear}
                   className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-400"
                 >
-                  Usar Calculado
+                  Limpar Ajuste
                 </button>
               </div>
               <p className="mt-1 text-sm text-slate-500">
@@ -71,7 +71,7 @@ function Header({ monthLabel, balance, calculatedBalance, manualBalanceInput, on
                   onClick={() => setIsEditing(true)}
                   className="ml-2 text-indigo-500 hover:text-indigo-400 underline"
                 >
-                  Editar
+                  Ajustar manualmente
                 </button>
               </p>
             </div>

@@ -8,6 +8,7 @@ import {
 import { getCategoryColor, getCategoryNames } from '../lib/categories'
 import { MONTHS } from '../lib/months'
 import { loadAppState, saveAppState } from '../lib/storage'
+import { fetchFinance, saveFinance } from '../lib/api'
 
 function buildMonthOptions(year = new Date().getFullYear()) {
   return MONTHS.map((month) => ({
@@ -141,6 +142,64 @@ function getManualBalanceDrafts(financeByMonth, monthOptions) {
   }, {})
 }
 
+function normalizeBackendIncome(income) {
+  return {
+    id: String(income.id || income._id || crypto.randomUUID()),
+    name: String(income.name || income.nome || income.description || ''),
+    amount: clampToMoney(income.amount ?? income.valor ?? 0),
+    type: String(income.type || 'salário'),
+    date: String(income.date || income.data || ''),
+  }
+}
+
+function normalizeBackendExpense(expense) {
+  return {
+    id: String(expense.id || expense._id || crypto.randomUUID()),
+    description: String(expense.description || expense.name || 'Despesa'),
+    category: String(expense.category || 'Outros'),
+    amount: clampToMoney(expense.amount ?? expense.valor ?? 0),
+    date: String(expense.date || expense.data || ''),
+    installmentsTotal: Math.max(1, Number(expense.installmentsTotal || 1)),
+    installmentsPaid: Math.min(
+      Math.max(0, Number(expense.installmentsPaid || 0)),
+      Math.max(1, Number(expense.installmentsTotal || 1)),
+    ),
+    isFixed: Boolean(expense.isFixed),
+  }
+}
+
+function buildMonthDataFromBackend(backendData, currentMonthData) {
+  return {
+    ...currentMonthData,
+    incomes: Array.isArray(backendData.receitas)
+      ? backendData.receitas.map(normalizeBackendIncome)
+      : currentMonthData.incomes || [],
+    expenses: Array.isArray(backendData.despesas)
+      ? backendData.despesas.map(normalizeBackendExpense)
+      : currentMonthData.expenses || [],
+    cashbox: clampToMoney(backendData.caixinha ?? currentMonthData.cashbox ?? 0),
+    carryOver: clampToMoney(backendData.saldoInicial ?? currentMonthData.carryOver ?? 0),
+    manualBalance:
+      backendData.ajusteManual !== undefined
+        ? clampToMoney(backendData.ajusteManual)
+        : currentMonthData.manualBalance,
+  }
+}
+
+function buildBackendPayload(monthKey, monthData) {
+  return {
+    mes: monthKey,
+    receitas: monthData.incomes || [],
+    despesas: monthData.expenses || [],
+    caixinha: clampToMoney(monthData.cashbox ?? 0),
+    saldoInicial: clampToMoney(monthData.carryOver ?? 0),
+    ajusteManual:
+      monthData.manualBalance !== null && monthData.manualBalance !== undefined
+        ? clampToMoney(monthData.manualBalance)
+        : 0,
+  }
+}
+
 export function useFinanceDashboard() {
   const currentYear = new Date().getFullYear()
   const monthOptions = useMemo(() => buildMonthOptions(currentYear), [currentYear])
@@ -174,6 +233,7 @@ export function useFinanceDashboard() {
     isFixed: false,
   })
   const [isDirty, setIsDirty] = useState(false)
+  const [backendError, setBackendError] = useState('')
 
   const monthLabel = useMemo(
     () => monthOptions.find((m) => m.key === selectedMonth)?.label || 'Mês',
@@ -193,6 +253,56 @@ export function useFinanceDashboard() {
     () => groupExpensesByCategory(monthData.expenses, getCategoryColor),
     [monthData.expenses],
   )
+
+  useEffect(() => {
+    let isActive = true
+
+    async function loadBackendData() {
+      try {
+        const backendData = await fetchFinance()
+        if (!isActive) return
+
+        if (backendData && backendData.mes === selectedMonth) {
+          const updatedMonth = buildMonthDataFromBackend(
+            backendData,
+            financeByMonth[selectedMonth] || DEFAULT_MONTH_DATA,
+          )
+          const updatedState = {
+            ...financeByMonth,
+            [selectedMonth]: updatedMonth,
+          }
+
+          setFinanceByMonth(updatedState)
+          saveAppState(updatedState)
+
+          setCashboxInputByMonth((prev) => ({
+            ...prev,
+            [selectedMonth]: String(clampToMoney(backendData.caixinha ?? 0)),
+          }))
+
+          setManualBalanceInputByMonth((prev) => ({
+            ...prev,
+            [selectedMonth]: backendData.ajusteManual !== undefined
+              ? String(clampToMoney(backendData.ajusteManual))
+              : prev[selectedMonth],
+          }))
+
+          setBackendError('')
+          setIsDirty(false)
+        } else if (backendData && backendData.mes) {
+          setBackendError('Dados do backend carregados para outro mês. Usando dados locais para o mês atual.')
+        }
+      } catch (error) {
+        setBackendError('Não foi possível conectar ao backend. Usando dados locais.')
+      }
+    }
+
+    loadBackendData()
+
+    return () => {
+      isActive = false
+    }
+  }, [selectedMonth])
 
   useEffect(() => {
     // Transferir saldo do mês anterior como carryOver para o mês atual
@@ -514,7 +624,7 @@ export function useFinanceDashboard() {
     setIsDirty(true)
   }
 
-  function handleSave() {
+  async function handleSave() {
     const cashbox = clampToMoney(cashboxInput)
     const updatedFinanceByMonth = {
       ...financeByMonth,
@@ -529,6 +639,16 @@ export function useFinanceDashboard() {
       ...prev,
       [selectedMonth]: cashbox ? String(cashbox) : '',
     }))
+
+    const payload = buildBackendPayload(selectedMonth, updatedFinanceByMonth[selectedMonth])
+
+    try {
+      await saveFinance(payload)
+      setBackendError('')
+    } catch (error) {
+      setBackendError('Não foi possível conectar ao backend. Dados gravados localmente.')
+    }
+
     saveAppState(updatedFinanceByMonth)
     setIsDirty(false)
   }
@@ -575,6 +695,7 @@ export function useFinanceDashboard() {
     handleClearAllExpenses,
     handleSetInstallmentsPaid,
     isDirty,
+    backendError,
     handleSave,
   }
 }

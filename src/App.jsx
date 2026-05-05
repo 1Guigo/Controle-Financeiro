@@ -34,6 +34,12 @@ function App() {
       selectedMonth={data.selectedMonth}
       onSelectMonth={data.setSelectedMonth}
     >
+      {data.backendError ? (
+        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {data.backendError}
+        </div>
+      ) : null}
+
       <Header
         monthLabel={data.monthLabel}
         balance={data.balance}

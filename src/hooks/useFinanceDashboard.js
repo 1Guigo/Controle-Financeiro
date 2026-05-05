@@ -173,6 +173,7 @@ export function useFinanceDashboard() {
     installmentsPaid: 0,
     isFixed: false,
   })
+  const [isDirty, setIsDirty] = useState(false)
 
   const monthLabel = useMemo(
     () => monthOptions.find((m) => m.key === selectedMonth)?.label || 'Mês',
@@ -214,10 +215,6 @@ export function useFinanceDashboard() {
     }
   }, [selectedMonth, financeByMonth, monthData.carryOver])
 
-  useEffect(() => {
-    saveAppState(financeByMonth)
-  }, [financeByMonth])
-
   function updateSelectedMonthData(updater) {
     setFinanceByMonth((prev) => ({
       ...prev,
@@ -246,6 +243,8 @@ export function useFinanceDashboard() {
       ...current,
       incomes: [...(current.incomes || []), newIncome],
     }))
+
+    setIsDirty(true)
 
     setIncomeForm({
       name: '',
@@ -288,6 +287,8 @@ export function useFinanceDashboard() {
       ),
     }))
 
+    setIsDirty(true)
+
     setIncomeForm({
       name: '',
       amount: '',
@@ -312,6 +313,7 @@ export function useFinanceDashboard() {
       ...current,
       incomes: (current.incomes || []).filter((inc) => inc.id !== id),
     }))
+    setIsDirty(true)
   }
 
   function handleCashboxInputChange(value) {
@@ -328,6 +330,7 @@ export function useFinanceDashboard() {
       ...prev,
       [selectedMonth]: cashbox ? String(cashbox) : '',
     }))
+    setIsDirty(true)
   }
 
   function handleManualBalanceInputChange(value) {
@@ -344,6 +347,7 @@ export function useFinanceDashboard() {
       ...prev,
       [selectedMonth]: manualBalance !== null ? String(manualBalance) : '',
     }))
+    setIsDirty(true)
   }
 
   function handleClearManualBalance() {
@@ -355,6 +359,7 @@ export function useFinanceDashboard() {
       ...prev,
       [selectedMonth]: '',
     }))
+    setIsDirty(true)
   }
 
   function handleExpenseFieldChange(name, value) {
@@ -389,6 +394,8 @@ export function useFinanceDashboard() {
       expenses: [newExpense, ...(current.expenses || [])],
     }))
 
+    setIsDirty(true)
+
     setExpenseForm({
       description: '',
       category: getCategoryNames()[0],
@@ -406,6 +413,7 @@ export function useFinanceDashboard() {
       ...current,
       expenses: (current.expenses || []).filter((expense) => expense.id !== id),
     }))
+    setIsDirty(true)
   }
 
   function handleEditExpense(id) {
@@ -456,6 +464,8 @@ export function useFinanceDashboard() {
       ),
     }))
 
+    setIsDirty(true)
+
     setExpenseForm({
       description: '',
       category: getCategoryNames()[0],
@@ -488,6 +498,7 @@ export function useFinanceDashboard() {
       ...current,
       expenses: [],
     }))
+    setIsDirty(true)
   }
 
   function handleSetInstallmentsPaid(id, nextPaid) {
@@ -500,6 +511,12 @@ export function useFinanceDashboard() {
         return { ...expense, installmentsTotal: total, installmentsPaid: paid }
       }),
     }))
+    setIsDirty(true)
+  }
+
+  function handleSave() {
+    saveAppState(financeByMonth)
+    setIsDirty(false)
   }
 
   return {
@@ -543,6 +560,8 @@ export function useFinanceDashboard() {
     handleRemoveExpense,
     handleClearAllExpenses,
     handleSetInstallmentsPaid,
+    isDirty,
+    handleSave,
   }
 }
 

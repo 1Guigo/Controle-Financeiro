@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import ChartsSection from './components/ChartsSection'
 import ExpenseFormsPanel from './components/ExpenseFormsPanel'
 import ExpensesTable from './components/ExpensesTable'
@@ -16,6 +17,17 @@ function App() {
     }
   }
 
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (data.isDirty) {
+        e.preventDefault()
+        e.returnValue = 'Você tem alterações não salvas'
+      }
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [data.isDirty])
+
   return (
     <Layout
       months={data.months}
@@ -31,6 +43,8 @@ function App() {
         onSaveManualBalance={data.handleSaveManualBalance}
         onClearManualBalance={data.handleClearManualBalance}
         onAddExpenseClick={scrollToExpenseForm}
+        isDirty={data.isDirty}
+        onSave={data.handleSave}
       />
 
       <section className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-3">

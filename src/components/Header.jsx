@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { formatCurrencyBRL } from '../lib/finance'
 
-function Header({ monthLabel, balance, calculatedBalance, manualBalanceInput, onManualBalanceInputChange, onSaveManualBalance, onClearManualBalance, onAddExpenseClick }) {
+function Header({ monthLabel, balance, calculatedBalance, manualBalanceInput, onManualBalanceInputChange, onSaveManualBalance, onClearManualBalance, onAddExpenseClick, isDirty, onSave }) {
   const [isEditing, setIsEditing] = useState(false)
 
   const handleSave = () => {
@@ -78,13 +78,36 @@ function Header({ monthLabel, balance, calculatedBalance, manualBalanceInput, on
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={onAddExpenseClick}
-          className="pressable rounded-2xl bg-indigo-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-indigo-400"
-        >
-          Adicionar gasto
-        </button>
+        <div className="flex flex-col items-end gap-2">
+          <div className="flex items-center gap-3">
+            <div className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors ${
+              isDirty 
+                ? 'bg-yellow-100 text-yellow-700' 
+                : 'bg-green-100 text-green-700'
+            }`}>
+              {isDirty ? '● Alterações não salvas' : '● Tudo salvo'}
+            </div>
+            <button
+              type="button"
+              onClick={onSave}
+              disabled={!isDirty}
+              className={`pressable rounded-2xl px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all duration-300 hover:-translate-y-0.5 ${
+                isDirty
+                  ? 'bg-green-500 hover:bg-green-400 cursor-pointer'
+                  : 'bg-gray-400 cursor-not-allowed opacity-60'
+              }`}
+            >
+              Salvar
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={onAddExpenseClick}
+            className="pressable rounded-2xl bg-indigo-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-indigo-400"
+          >
+            Adicionar gasto
+          </button>
+        </div>
       </div>
     </header>
   )
